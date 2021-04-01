@@ -41,8 +41,19 @@ table {
 	border-spacing: 0;
 }
 
-.event-map-cell {
+body {
+	background: #95a5a6;
+	color: #bdc3c7;
+}
 
+textarea {
+	background: rgba(40, 42, 54, 0.99);
+	color: #bdc3c7;
+}
+
+.dark-theme {
+	background: rgba(40, 42, 54, 0.99);
+	color: #bdc3c7;
 }
 
 .toolbar {
@@ -61,22 +72,36 @@ table {
   cursor: pointer;
 }
 
+.small-subheading {
+	margin-bottom: 20px;
+	text-decoration: underline;
+}
+
 #cell-box {
-  width: 99vw;
-  height: 85vh;
-  background: white;
-  border: 5px solid black;
-  box-shadow: 3px 3px 3px grey;
-  top: 0;
-  position: absolute;
-  display: none;
+	width: 100vw;
+	height: 100vh;
+	border: 5px solid black;
+	box-shadow: 3px 3px 3px grey;
+	top: 0;
+	position: absolute;
+	display: none;
+	overflow: scroll;
+}
+
+#settings-box {
+	width: 100vw;
+	height: 100vh;
+	border: 5px solid black;
+	box-shadow: 3px 3px 3px grey;
+	top: 0;
+	position: absolute;
+	display: none;
 	overflow: scroll;
 }
 
 #grid-select-box {
   width: 99vw;
   height: 85vh;
-  background: white;
   border: 5px solid black;
   box-shadow: 3px 3px 3px grey;
   top: 0;
@@ -112,8 +137,40 @@ table {
   visibility: visible;
 }
 
-#grid {
+#help-box {
+	width: 100vw;
+	height: 100vh;
+	border: 5px solid black;
+	box-shadow: 3px 3px 3px grey;
+	top: 0;
+	position: absolute;
+	display: none;
+	overflow: scroll;
+}
 
+.main-heading {
+	text-align: center;
+	font-size: 3em;
+	font-weight: bold;
+	padding-top: 10vh;
+	padding-bottom: 10vh;
+	border-bottom: 3px solid black;
+	margin-top: 10vh;
+}
+
+.main-text {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 800px;
+	margin-top: 10vh;
+	font-size: 1.5em;
+	font-family: serif;
+	line-height: 1.5em;
+}
+
+.subheading {
+	text-align: center;
+	font-size: 1.5em;
 }
 
 .big-table {
@@ -139,15 +196,27 @@ table {
 	border: 1px solid black;
 }
 
+.text-pg {
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
 #add-grid-button {
-	background: green;
-	color: white;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	background: #bdc3c7;
+	color: black;
 	font-size: 3em;
 	text-align: center;
+	font-family: serif;
 }
 
 #add-grid-button:hover {
 	cursor: pointer;
-	background: red;
-	color: white;
+	background: #2980b9;
+	color: #bdc3c7;
+}
+
+a {
+ color: #bdc3c7;
 }

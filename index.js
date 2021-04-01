@@ -1,8 +1,5 @@
 // TODO:
 //INCORPORATE WEIGHTING OF DIRECTIONAL MOVEMENT
-//INCORPORATE GRID CREATION
-//VARIABLE MATH
-//STRING INTERPOLATION
 //COMPONENT PROBABILITY
 
 function GID(el) {
@@ -383,26 +380,47 @@ GID("minusicon").onclick = function() {
   drawGrid();
 }
 
-//otherwise, boxes only appear on second click...
-GID("cell-box").style.display = "none";
-GID("grid-select-box").style.display = "none";
-
-GID("writeicon").onclick = function() {
-  let d = GID("cell-box").style.display;
+function showHide(el) {
+  let d = GID(el).style.display;
   if (d === "none") {
-    GID("cell-box").style.display = "block";
+    GID(el).style.display = "block";
   } else {
-    GID("cell-box").style.display = "none";
+    GID(el).style.display = "none";
   }
 }
 
+//otherwise, boxes only appear on second click...
+GID("cell-box").style.display = "none";
+GID("grid-select-box").style.display = "none";
+GID("help-box").style.display = "none";
+GID("settings-box").style.display = "none";
+
+GID("writeicon").onclick = function() {
+  showHide("cell-box")
+}
+
+GID("helpicon").onclick = function() {
+  showHide("help-box");
+}
+
+GID("help-box").onclick = function() {
+  showHide("help-box");
+}
+
+GID("settings-box").onclick = function() {
+  showHide("settings-box");
+}
+
+GID("settingsicon").onclick = function() {
+  showHide("settings-box");
+}
+
+GID("cell-box").onclick = function() {
+  showHide("cell-box");
+}
+
 GID("gridicon").onclick = function() {
-  let d = GID("grid-select-box").style.display;
-  if (d === "none") {
-    GID("grid-select-box").style.display = "block";
-  } else {
-    GID("grid-select-box").style.display = "none";
-  }
+  showHide("grid-select-box");
 }
 let counter = 0
 
