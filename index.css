@@ -49,6 +49,7 @@ body {
 textarea {
 	background: rgba(40, 42, 54, 0.99);
 	color: #bdc3c7;
+	font-size: 2em;
 }
 
 .dark-theme {
