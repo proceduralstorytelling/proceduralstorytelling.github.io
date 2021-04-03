@@ -184,6 +184,7 @@ textarea {
   width: 98%;
   height: 100%;
   border: 1px solid black;
+	font-size: 20px;
 }
 
 .grid-list {

@@ -345,7 +345,9 @@ function buildGrid(size) {
   return t;
 }
 
-function drawGrid() {
+let globalFontSize = 20;
+
+function drawGrid(fontSize) {
   GID("grid").innerHTML = buildGrid(g.currentGrid.magnification);
   for (let i = 0; i < g.currentGrid.cellArray.length; i++) {
     try {
@@ -355,7 +357,22 @@ function drawGrid() {
     }
   }
   let els = document.getElementsByClassName("inner-cell")
+  if (fontSize === "l") {
+    if (g.currentGrid.magnification < 10) {
+      globalFontSize += 5;
+    }
+  } else if (fontSize === "s") {
+    if (globalFontSize !== 5) {
+      globalFontSize -= 5;
+    }
+  }
+  console.log(fontSize);
   for (let i = 0; i < els.length; i++) {
+    if (fontSize && fontSize === "l") {
+      els[i].style.fontSize = `${globalFontSize}px`;
+    } else if (fontSize && fontSize === "s") {
+      els[i].style.fontSize = `${globalFontSize}px`;
+    }
     els[i].onblur = function() {
       let coords = els[i].id;
       saveCell(g, coords);
@@ -369,7 +386,7 @@ GID("plusicon").onclick = function() {
     if (g.currentGrid.magnification % 2 === 0) {
       g.currentGrid.magnification -= 1;
     }
-    drawGrid();
+    drawGrid("l");
   }
 }
 GID("minusicon").onclick = function() {
@@ -377,7 +394,7 @@ GID("minusicon").onclick = function() {
   if (g.currentGrid.magnification % 2 === 0) {
     g.currentGrid.magnification += 1;
   }
-  drawGrid();
+  drawGrid("s");
 }
 
 function showHide(el) {
