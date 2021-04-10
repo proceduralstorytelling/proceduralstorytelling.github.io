@@ -110,25 +110,18 @@ function variableChange(c, e) {
     } else {
       let exists = false;
       if (e.variables.length === 0 && (op === "+=" || op === "-=")) {
-        console.log(value);
         let newValue = doMath(0, op, value);
-        console.log(newValue);
         let o = {};
         o.name = name;
         o.value = newValue;
-        console.log(o);
         e.variables.push(o);
-        console.log(e.variables);
         exists = true;
       } else {
         for (let j = 0; j < e.variables.length; j++) {
           let eName = e.variables[j].name;
           if (eName === name) {
             exists = true;
-            console.log(e.variables[j].value)
-            console.log(op);
             let newValue = doMath(e.variables[j].value, op, value);
-            console.log(newValue);
             e.variables[j].value = newValue;
           }
         }
@@ -241,12 +234,33 @@ function parseVariableFromText(t) {
   }
 }
 
+function getChoiceFromMatch(m) {
+  let o = {};
+  let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
+  let  parensArr = m.match(parens);
+  o.text = m.replace(parens, "");
+  o.text = o.text.replace("choice: ", "")
+  o.text = o.text.replace("[", "");
+  o.text = o.text.replace("]", "")
+  for (let z = 0; z < parensArr.length; z++) {
+    if (parensArr[z].includes("=") || parensArr[z].includes("<") || parensArr[z].includes(">")) {
+      let unp = parensArr[z].replace("(", "");
+      unp = unp.replace(")", "");
+      o.variables = normBrackets(unp);
+      o.variables = setVariableArray(o.variables)
+    } else {
+      o.directions = normBrackets(parensArr[z])
+    }
+  }
+  return o
+}
+
 function saveCell(g, coords) {
   let v = GID(`${coords}`).value
   if (v.length > 0) {
     let o = {};
     let exists = false;
-    let total = /\[[\w\s\+\.\-\=\<\>\!\d\,]+\]/g
+    let total = /\[[\w\s\+\.\-\=\<\>\!\d\,\:\(\)]+\]/g
     let rx = /x([\-\d]+)/
     let ry = /y([\-\d]+)/
 
@@ -262,14 +276,17 @@ function saveCell(g, coords) {
           let c = {};
           c.variables = [];
           c.directions = [];
+          c.choices = [];
           c.text = components[j].trim();
-          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\,\d]+\]/g, "")
+          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\,\:\d\(\)]+\]/g, "")
           let matches = components[j].match(total);
           if (matches) {
             for (let n = 0; n < matches.length; n++) {
               if (matches[n].includes("[START]")) {
                 c.start = true;
-              } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
+              } else if (matches[n].includes("choice:")) {
+                c.choices.push(getChoiceFromMatch(matches[n]))
+              }else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
                 let unprocessedVariables = normBrackets(matches[n])
                 c.variables = setVariableArray(unprocessedVariables);
               } else {
@@ -298,13 +315,16 @@ function saveCell(g, coords) {
         let c = {};
         c.variables = [];
         c.directions = [];
+        c.choices = [];
         c.text = components[j].trim();
-        c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!,\d\.]+\]/g, "")
+        c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!,\d\.\:\(\)]+\]/g, "")
         let matches = components[j].match(total);
         if (matches) {
           for (let n = 0; n < matches.length; n++) {
             if (matches[n].includes("[START]")) {
               c.start = true;
+            } else if (matches[n].includes("choice:")) {
+              c.choices.push(getChoiceFromMatch(matches[n]))
             } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
               let unprocessedVariables = normBrackets(matches[n])
               c.variables = setVariableArray(unprocessedVariables);
@@ -366,7 +386,6 @@ function drawGrid(fontSize) {
       globalFontSize -= 5;
     }
   }
-  console.log(fontSize);
   for (let i = 0; i < els.length; i++) {
     if (fontSize && fontSize === "l") {
       els[i].style.fontSize = `${globalFontSize}px`;
@@ -736,7 +755,6 @@ function getRandomFromArr(arr) {
 function createPossibleComponentsArr(w, c) {
   let arr = [];
   for (let i = 0; i < c.length; i++) {
-    console.log(c[i]);
     if (variablesConflict(w, c[i]) === false) {
       arr.push(c[i]);
     } else {
@@ -853,9 +871,6 @@ function createPossibleCellsArr(w, component, x, y) {
 
 
 function generate(grid, w) {
-  //having trouble with getting grids to run.
-  //working on recursion
-  console.log(w);
   let lastGrid;
   if (grid) {
     lastGrid = g.currentGrid;
