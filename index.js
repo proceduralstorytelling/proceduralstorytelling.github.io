@@ -2,6 +2,8 @@
 //INCORPORATE WEIGHTING OF DIRECTIONAL MOVEMENT
 //COMPONENT PROBABILITY
 
+let globalFontSize = 9;
+
 function GID(el) {
   return document.getElementById(el);
 }
@@ -378,7 +380,7 @@ function buildGrid(size) {
   return t;
 }
 
-let globalFontSize = 10;
+
 
 function drawGrid(fontSize) {
   GID("grid").innerHTML = buildGrid(g.currentGrid.magnification);
@@ -392,17 +394,19 @@ function drawGrid(fontSize) {
   let els = document.getElementsByClassName("inner-cell")
   if (fontSize === "l") {
     if (g.currentGrid.magnification < 10) {
-      globalFontSize += 5;
+      globalFontSize += 3;
     }
   } else if (fontSize === "s") {
-    if (globalFontSize !== 5) {
-      globalFontSize -= 5;
+    if (globalFontSize !== 3) {
+      globalFontSize -= 3;
     }
   }
   for (let i = 0; i < els.length; i++) {
     if (fontSize && fontSize === "l") {
       els[i].style.fontSize = `${globalFontSize}px`;
     } else if (fontSize && fontSize === "s") {
+      els[i].style.fontSize = `${globalFontSize}px`;
+    } else {
       els[i].style.fontSize = `${globalFontSize}px`;
     }
     els[i].onblur = function() {
