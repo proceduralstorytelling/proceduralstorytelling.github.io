@@ -378,7 +378,7 @@ function buildGrid(size) {
   return t;
 }
 
-let globalFontSize = 20;
+let globalFontSize = 10;
 
 function drawGrid(fontSize) {
   GID("grid").innerHTML = buildGrid(g.currentGrid.magnification);
