@@ -238,3 +238,8 @@ a {
 	font-family: serif;
 	font-size: 1.5em;
 }
+
+.choiceslist:hover {
+	cursor: pointer;
+	color: green;
+}

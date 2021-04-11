@@ -509,11 +509,13 @@ function runGenerationProcess(grid, w) {
   g.output = "";
   if (grid && w) {
     generate(grid, w, true);
+    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, g.output)}</div>`;
   } else {
     generate();
+    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, g.output)}</div>`;
   }
 
-  GID("cell-box").innerHTML += `<div id="output-box">${g.output}</div>`;
+
   GID("cell-box").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
     let num = n;
@@ -525,6 +527,7 @@ function runGenerationProcess(grid, w) {
       let id = els[n].id.replace("choice", "");
       if (g.choices[id].directions && g.choices[id].directions.length > 0) {
         let walker = g.lastWalker;
+        addChoiceToWalker(walker, g.choices[id])
         let directions = g.choices[id].directions;
         let nextDirection = directions[getRandomInt(0, directions.length - 1)];
         let possibleNextCells = createPossibleCellsArr(walker, g.choices[id], g.choices[id].x, g.choices[id].y)
@@ -738,6 +741,31 @@ function genLoop(walker) {
       generating = false;
     }
   }
+  g.lastWalker = walker;
+}
+
+function addChoiceToWalker(w, c) {
+  if (c.variables) {
+    for (let i = 0; i < c.variables.length; i++) {
+      let exists = false;
+      for (let j = 0; j < w.variables.length; j++) {
+        if (variablesHaveSameName(w.variables[j], c.variables[i])) {
+          exists = true;
+          if (isComparisonOperator(c.variables[i].operation) === false) {
+            let newValue = doMath(w.variables[j].value, c.variables[i].operation, c.variables[i].value)
+            w.variables[j].value = newValue;
+          }
+        }
+      }
+      if (exists === false) {
+        //address fact that some variables are strings.
+        let o = {};
+        o.name = c.variables[i].name;
+        o.value = doMath(0, c.variables[i].operation, c.variables[i].value)
+        w.variables.push(o);
+      }
+    }
+  }
 }
 
 function addComponentTo(w, comp) {
@@ -922,7 +950,5 @@ function generate(grid, w, continuing) {
   if (lastGrid !== undefined) {
     g.currentGrid = lastGrid
   }
-
-  g.lastWalker = walker;
 
 }
