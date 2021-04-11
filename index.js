@@ -9,6 +9,7 @@ function GID(el) {
 }
 
 function compare(v, o, nv) {
+
   v = `${v}`;
   nv = `${nv}`
   if (v.match(/\d+/) || nv.match(/\d+/)) {
@@ -81,6 +82,7 @@ function variableCheck(c, e) {
         if (eName === name) {
           exists = true;
           if (op === "===" || op === "<" || op === ">" || op === ">=" || op === "<=" || op === "!==") {
+
             equalityChecks = compare(e.variables[j].value, op, value)
           }
         }
@@ -245,13 +247,11 @@ function getChoiceFromMatch(m, coords) {
   o.y = parseInt(coords.match(ry)[1]);
   let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
   let  parensArr = m.match(parens) || [];
-  console.log(parensArr);
   o.text = m.replace(parens, "");
   o.text = o.text.replace("choice: ", "")
   o.text = o.text.replace("[", "");
   o.text = o.text.replace("]", "")
   o.gridName = g.currentGrid.name;
-  console.log(o.gridName)
   for (let z = 0; z < parensArr.length; z++) {
     if (parensArr[z].includes("=") || parensArr[z].includes("<") || parensArr[z].includes(">")) {
       let unp = parensArr[z].replace("(", "");
@@ -260,7 +260,6 @@ function getChoiceFromMatch(m, coords) {
       o.variables = setVariableArray(o.variables)
     } else {
       o.directions = normBrackets(parensArr[z])
-      console.log(o.directions);
       for (let n = 0; n < o.directions.length; n++) {
         o.directions[n] = o.directions[n].replace(")", "");
         o.directions[n] = o.directions[n].replace("(", "");
@@ -506,7 +505,6 @@ GID("add-grid-button").onclick = function() {
 }
 
 function runGenerationProcess(grid, w) {
-  console.log("generating");
   GID("cell-box").innerHTML = "";
   g.output = "";
   if (grid && w) {
@@ -516,7 +514,6 @@ function runGenerationProcess(grid, w) {
   }
 
   GID("cell-box").innerHTML += `<div id="output-box">${g.output}</div>`;
-  console.log(g.choices);
   GID("cell-box").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
     let num = n;
@@ -534,7 +531,6 @@ function runGenerationProcess(grid, w) {
         let choiceGrid = g.choices[id].gridName
         if (possibleNextCells.length > 0) {
           let nextCell = getRandomFromArr(possibleNextCells);
-          console.log(nextCell);
           walker.x = nextCell.x;
           walker.y = nextCell.y;
         }
@@ -594,20 +590,6 @@ function getCell(x, y) {
   }
 }
 
-function getComponent(walker, cell) {
-  let possibleComponents = [];
-  for (let i = 0; i < cell.components.length; i++) {
-
-    if (variableCheck(walker, cell.components[i])) {
-      possibleComponents.push(cell.components[i])
-    }
-  }
-  let limit = possibleComponents.length - 1
-  let rand = getRandomInt(0, limit)
-  //THIS IS WHERE THE PROBLEM IS - YOU ARE RANDOMLY GETTING A COMPONENT FROM CELL EVEN THOUGH CELL MAY ONLY CONTAIN ONE MATCHING COMP
-  return possibleComponents[rand];
-}
-
 function getCellArr(component, x, y) {
   // TODO: incorporate weighting
   if (component.directions && component.directions.length > 0) {
@@ -653,23 +635,6 @@ function getCellArr(component, x, y) {
   } else {
     return "STOP";
   }
-}
-
-function filterCellsByVariables(cArr, walker) {
-  //prevents cells from being called if no components on cell are consistent w/ variables
-  let resArr = [];
-  for (let i = 0; i < cArr.length; i++) {
-    let hasPossibleComponent = false;
-    let cell = cArr[i];
-    for (let j = 0; j < cell.components.length; j++) {
-      hasPossibleComponent = variableCheck(walker, cell.components[j])
-      if (hasPossibleComponent === true) {
-        j = cell.components.length + 1;
-        resArr.push(cell)
-      }
-    }
-  }
-  return resArr;
 }
 
 function getStarts() {
@@ -814,7 +779,6 @@ function createPossibleComponentsArr(w, c) {
     if (variablesConflict(w, c[i]) === false) {
       arr.push(c[i]);
     } else {
-      console.log("CONFLICT!");
     }
   }
   return arr;
@@ -877,7 +841,6 @@ function createPossibleCellsArr(w, component, x, y) {
     g.currentGrid = getGridByName(g, component.gridName)
   }
   //component is a misnomer here, also can take choices
-  console.log(component);
   if (component.directions && component.directions.length > 0) {
     let dArr = [];
     for (let i = 0; i < component.directions.length; i++) {
@@ -910,17 +873,18 @@ function createPossibleCellsArr(w, component, x, y) {
         validDirection = false;
       }
       if (validDirection === true) {
-        console.log(g.currentGrid);
         let dir = getCell(targetX, targetY);
-        console.log(dir);
 
         //check cell from direction to see if at least one component does not conflict
         let conflicts = true;
+
+
         for (let j = 0; j < dir.components.length; j++) {
-          if (variablesConflict(w, dir.components[i]) === false) {
+          if (variablesConflict(w, dir.components[j]) === false) {
             conflicts = false;
           }
         }
+
 
         if (dir !== undefined && conflicts === false) {
           dArr.push(dir)
