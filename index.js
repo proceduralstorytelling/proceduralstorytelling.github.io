@@ -164,6 +164,7 @@ function getRandomInt(min, max) {
 
 let g = {};
 g.output = "";
+g.choices = [];
 
 function createGrid(n) {
   let grid = {};
@@ -234,14 +235,21 @@ function parseVariableFromText(t) {
   }
 }
 
-function getChoiceFromMatch(m) {
+function getChoiceFromMatch(m, coords) {
   let o = {};
+  let rx = /x([\-\d]+)/
+  let ry = /y([\-\d]+)/
+  o.x = parseInt(coords.match(rx)[1]);
+  o.y = parseInt(coords.match(ry)[1]);
   let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
-  let  parensArr = m.match(parens);
+  let  parensArr = m.match(parens) || [];
+  console.log(parensArr);
   o.text = m.replace(parens, "");
   o.text = o.text.replace("choice: ", "")
   o.text = o.text.replace("[", "");
   o.text = o.text.replace("]", "")
+  o.gridName = g.currentGrid.name;
+  console.log(o.gridName)
   for (let z = 0; z < parensArr.length; z++) {
     if (parensArr[z].includes("=") || parensArr[z].includes("<") || parensArr[z].includes(">")) {
       let unp = parensArr[z].replace("(", "");
@@ -250,6 +258,11 @@ function getChoiceFromMatch(m) {
       o.variables = setVariableArray(o.variables)
     } else {
       o.directions = normBrackets(parensArr[z])
+      console.log(o.directions);
+      for (let n = 0; n < o.directions.length; n++) {
+        o.directions[n] = o.directions[n].replace(")", "");
+        o.directions[n] = o.directions[n].replace("(", "");
+      }
     }
   }
   return o
@@ -285,7 +298,7 @@ function saveCell(g, coords) {
               if (matches[n].includes("[START]")) {
                 c.start = true;
               } else if (matches[n].includes("choice:")) {
-                c.choices.push(getChoiceFromMatch(matches[n]))
+                c.choices.push(getChoiceFromMatch(matches[n], coords))
               }else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
                 let unprocessedVariables = normBrackets(matches[n])
                 c.variables = setVariableArray(unprocessedVariables);
@@ -324,7 +337,7 @@ function saveCell(g, coords) {
             if (matches[n].includes("[START]")) {
               c.start = true;
             } else if (matches[n].includes("choice:")) {
-              c.choices.push(getChoiceFromMatch(matches[n]))
+              c.choices.push(getChoiceFromMatch(matches[n], o.coords))
             } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
               let unprocessedVariables = normBrackets(matches[n])
               c.variables = setVariableArray(unprocessedVariables);
@@ -452,7 +465,7 @@ GID("settingsicon").onclick = function() {
 }
 
 GID("cell-box").onclick = function() {
-  showHide("cell-box");
+  //showHide("cell-box");
 }
 
 GID("gridicon").onclick = function() {
@@ -488,14 +501,48 @@ GID("add-grid-button").onclick = function() {
   addGrid();
 }
 
-GID("generateicon").onclick = function() {
+function runGenerationProcess(grid, w) {
+  console.log("generating");
   GID("cell-box").innerHTML = "";
-  for (let i = 0; i < 100; i++) {
-    g.output += `<p>Generation Run ${i}:</p>`;
+  g.output = "";
+  if (grid && w) {
+    generate(grid, w, true);
+  } else {
     generate();
-    GID("cell-box").innerHTML += g.output;
-    g.output = "";
   }
+
+  GID("cell-box").innerHTML += `<div id="output-box">${g.output}</div>`;
+  console.log(g.choices);
+  GID("cell-box").innerHTML += `<div id="choices-box"></div>`
+  for (let n = 0; n < g.choices.length; n++) {
+    let num = n;
+    GID("choices-box").innerHTML += `<p class=choiceslist id=choice${num}>${g.choices[n].text}</p>`
+  }
+  let els = document.getElementsByClassName("choiceslist");
+  for (let n = 0; n < els.length; n++) {
+    els[n].onclick = function() {
+      let id = els[n].id.replace("choice", "");
+      if (g.choices[id].directions && g.choices[id].directions.length > 0) {
+        let walker = g.lastWalker;
+        let directions = g.choices[id].directions;
+        let nextDirection = directions[getRandomInt(0, directions.length - 1)];
+        let possibleNextCells = createPossibleCellsArr(walker, g.choices[id], g.choices[id].x, g.choices[id].y)
+        let choiceGrid = g.choices[id].gridName
+        if (possibleNextCells.length > 0) {
+          let nextCell = getRandomFromArr(possibleNextCells);
+          console.log(nextCell);
+          walker.x = nextCell.x;
+          walker.y = nextCell.y;
+        }
+        g.lastWalker = walker;
+        runGenerationProcess(getGridByName(g, choiceGrid), walker);
+      }
+    }
+  }
+}
+
+GID("generateicon").onclick = function() {
+  runGenerationProcess();
 }
 
 GID("saveicon").onclick = function() {
@@ -746,6 +793,11 @@ function addComponentTo(w, comp) {
       }
     }
   }
+  if (comp.choices.length > 0) {
+    for (let i = 0; i < comp.choices.length; i++) {
+      g.choices.push(comp.choices[i]);
+    }
+  }
 }
 
 function getRandomFromArr(arr) {
@@ -815,6 +867,13 @@ function variablesConflict(w, c) {
 }
 
 function createPossibleCellsArr(w, component, x, y) {
+  let gridHolder = g.currentGrid.name;
+  if (component.gridName) {
+    //deals with choices not being called until later
+    g.currentGrid = getGridByName(g, component.gridName)
+  }
+  //component is a misnomer here, also can take choices
+  console.log(component);
   if (component.directions && component.directions.length > 0) {
     let dArr = [];
     for (let i = 0; i < component.directions.length; i++) {
@@ -847,7 +906,9 @@ function createPossibleCellsArr(w, component, x, y) {
         validDirection = false;
       }
       if (validDirection === true) {
+        console.log(g.currentGrid);
         let dir = getCell(targetX, targetY);
+        console.log(dir);
 
         //check cell from direction to see if at least one component does not conflict
         let conflicts = true;
@@ -862,6 +923,7 @@ function createPossibleCellsArr(w, component, x, y) {
         }
       }
     }
+    g.currentGrid = getGridByName(g, gridHolder);
     return dArr;
   } else {
     return [];
@@ -870,7 +932,8 @@ function createPossibleCellsArr(w, component, x, y) {
 
 
 
-function generate(grid, w) {
+function generate(grid, w, continuing) {
+  g.choices = [];
   let lastGrid;
   if (grid) {
     lastGrid = g.currentGrid;
@@ -878,8 +941,12 @@ function generate(grid, w) {
   }
   let start = setStart();
   let walker = w || getWalker(start)
-  walker.x = start.x;
-  walker.y = start.y;
+  if (continuing) {
+
+  } else {
+    walker.x = start.x;
+    walker.y = start.y;
+  }
   genLoop(walker);
 
 
@@ -888,5 +955,6 @@ function generate(grid, w) {
     g.currentGrid = lastGrid
   }
 
-  //deal with travel
+  g.lastWalker = walker;
+
 }

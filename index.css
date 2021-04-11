@@ -80,7 +80,7 @@ textarea {
 
 #cell-box {
 	width: 100vw;
-	height: 100vh;
+	height: 85vh;
 	border: 5px solid black;
 	box-shadow: 3px 3px 3px grey;
 	top: 0;
@@ -221,4 +221,20 @@ textarea {
 
 a {
  color: #bdc3c7;
+}
+
+#output-box {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 600px;
+	margin-top: 10vh;
+	font-family: serif;
+	font-size: 1.5em;
+}
+
+#choices-box {
+	margin-top: 10vh;
+	text-align: center;
+	font-family: serif;
+	font-size: 1.5em;
 }
