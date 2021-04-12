@@ -490,6 +490,24 @@ GID("cell-box").onclick = function() {
 
 GID("gridicon").onclick = function() {
   showHide("grid-select-box");
+  GID("grid-select-box").innerHTML = "";
+  let t = "";
+  t += "<p id=add-grid-button>Add Grid</p>";
+  for (let i = 0; i < g.grids.length; i++) {
+    t += `<p class="grid-list">${g.grids[i].name}</p>`
+  }
+  GID("grid-select-box").innerHTML += t;
+  let els = document.getElementsByClassName("grid-list");
+  for (let i = 0; i < els.length; i++) {
+    els[i].onclick = function() {
+      g.currentGrid = g.grids[i]
+      drawGrid();
+      GID("grid-select-box").style.display = "none";
+    }
+  }
+  GID("add-grid-button").onclick = function() {
+    addGrid();
+  }
 }
 let counter = 0
 
