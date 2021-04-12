@@ -352,6 +352,23 @@ function saveCell(g, coords) {
       o.components = cArr
       g.currentGrid.cellArray.push(o);
     }
+  } else {
+    //delete cell if it is later empty
+    let rx = /x([\-\d]+)/
+    let ry = /y([\-\d]+)/
+    let x = parseInt(coords.match(rx)[1]);
+    let y = parseInt(coords.match(ry)[1]);
+    let deleteIndex = false
+    for (let i = 0; i < g.currentGrid.cellArray.length; i++) {
+      if (g.currentGrid.cellArray[i].coords === coords) {
+        deleteIndex = i
+      }
+    }
+    if (deleteIndex) {
+      console.log(g.currentGrid.cellArray)
+      g.currentGrid.cellArray.splice(deleteIndex, 1);
+      console.log(g.currentGrid.cellArray)
+    }
   }
 }
 
