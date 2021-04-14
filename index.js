@@ -808,11 +808,16 @@ function addComponentTo(w, comp) {
     for (let i = 0; i < comp.variables.length; i++) {
       let exists = false;
       for (let j = 0; j < w.variables.length; j++) {
-        if (variablesHaveSameName(w.variables[j], comp.variables[i])) {
+        let wv = w.variables[j];
+        wv = replaceVariable(w, wv);
+        let cv = comp.variables[i];
+        cv = replaceVariable(w, cv);
+        if (variablesHaveSameName(wv, cv)) {
           exists = true;
-          if (isComparisonOperator(comp.variables[i].operation) === false) {
-            let newValue = doMath(w.variables[j].value, comp.variables[i].operation, comp.variables[i].value)
+          if (isComparisonOperator(cv.operation) === false) {
+            let newValue = doMath(wv.value, cv.operation, cv.value)
             w.variables[j].value = newValue;
+            w.variables[j].value = replaceVariable(w, o.value);
           }
         }
       }
@@ -820,7 +825,9 @@ function addComponentTo(w, comp) {
         //address fact that some variables are strings.
         let o = {};
         o.name = comp.variables[i].name;
+        o.name = replaceVariable(w, o.name)
         o.value = doMath(0, comp.variables[i].operation, comp.variables[i].value)
+        o.value = replaceVariable(w, o.value)
         w.variables.push(o);
       }
     }
