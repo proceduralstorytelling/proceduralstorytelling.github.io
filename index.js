@@ -755,7 +755,8 @@ function genLoop(walker) {
     let currentComponent = getRandomFromArr(possibleComponents)
     addComponentTo(walker, currentComponent);
     if (currentComponent.text.includes("runGrid(")) {
-      let m = currentComponent.text.match(/runGrid\((\w+)\)/)
+      let m = currentComponent.text.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
+      m[1] = replaceVariable(walker, m[1])
       let lastGrid = g.currentGrid;
       let lastX = walker.x;
       let lastY = walker.y;
