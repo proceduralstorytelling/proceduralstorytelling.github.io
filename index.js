@@ -247,7 +247,8 @@ function getChoiceFromMatch(m, coords) {
   o.y = parseInt(coords.match(ry)[1]);
   let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
   let  parensArr = m.match(parens) || [];
-  o.text = m.replace(parens, "");
+  //o.text = m.replace(parens, "");
+  o.text = m;
   o.text = o.text.replace("choice: ", "")
   o.text = o.text.replace("[", "");
   o.text = o.text.replace("]", "")
@@ -300,7 +301,13 @@ function saveCell(g, coords) {
                 c.start = true;
               } else if (matches[n].includes("choice:")) {
                 c.choices.push(getChoiceFromMatch(matches[n], coords))
-              }else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
+              } else if (matches[n].includes("bg:")) {
+                c.background = matches[n].replace("bg: ", "").replace("[", "").replace("]", "");
+              } else if (matches[n].includes("color:")) {
+                c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
+              } else if (matches[n].includes("img:")) {
+                c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
+              } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
                 let unprocessedVariables = normBrackets(matches[n])
                 c.variables = setVariableArray(unprocessedVariables);
               } else {
@@ -339,6 +346,12 @@ function saveCell(g, coords) {
               c.start = true;
             } else if (matches[n].includes("choice:")) {
               c.choices.push(getChoiceFromMatch(matches[n], o.coords))
+            } else if (matches[n].includes("bg:")) {
+              c.background = matches[n].replace("bg: ", "").replace("[", "").replace("]", "");
+            } else if (matches[n].includes("color:")) {
+              c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
+            } else if (matches[n].includes("img:")) {
+              c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
             } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
               let unprocessedVariables = normBrackets(matches[n])
               c.variables = setVariableArray(unprocessedVariables);
@@ -543,30 +556,33 @@ function runGenerationProcess(grid, w) {
   GID("cell-box").innerHTML = "";
   g.output = "";
   if (grid && w) {
-    generate(grid, w, true);
-    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, g.output)}</div>`;
+    let t = generate(grid, w, true);
+    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   } else {
-    generate();
-    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, g.output)}</div>`;
+    let t = generate();
+    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   }
 
 
   GID("cell-box").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
+    let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
+    //WORKING HERE
     let num = n;
-    GID("choices-box").innerHTML += `<p class=choiceslist id=choice${num}>${replaceVariable(g.lastWalker, g.choices[n].text)}</p>`
+    let t = g.choices[n].text.replace(parens, "")
+    GID("choices-box").innerHTML += `<p class=choiceslist id=choice${num}>${replaceVariable(g.lastWalker, t)}</p>`
   }
   let els = document.getElementsByClassName("choiceslist");
   for (let n = 0; n < els.length; n++) {
     els[n].onclick = function() {
       let id = els[n].id.replace("choice", "");
-      if (g.choices[id].directions && g.choices[id].directions.length > 0) {
+      if (g.oldChoices[id].directions && g.oldChoices[id].directions.length > 0) {
         let walker = g.lastWalker;
-        addChoiceToWalker(walker, g.choices[id])
-        let directions = g.choices[id].directions;
+        addChoiceToWalker(walker, g.oldChoices[id])
+        let directions = g.oldChoices[id].directions;
         let nextDirection = directions[getRandomInt(0, directions.length - 1)];
-        let possibleNextCells = createPossibleCellsArr(walker, g.choices[id], g.choices[id].x, g.choices[id].y)
-        let choiceGrid = g.choices[id].gridName
+        let possibleNextCells = createPossibleCellsArr(walker, g.oldChoices[id], g.oldChoices[id].x, g.oldChoices[id].y)
+        let choiceGrid = g.oldChoices[id].gridName
         if (possibleNextCells.length > 0) {
           let nextCell = getRandomFromArr(possibleNextCells);
           walker.x = nextCell.x;
@@ -577,6 +593,8 @@ function runGenerationProcess(grid, w) {
       }
     }
   }
+  g.oldChoices = g.choices;
+  g.choices = [];
 }
 
 GID("generateicon").onclick = function() {
@@ -747,13 +765,54 @@ function getWalker(start, w) {
   return walker;
 }
 
+
+
 function genLoop(walker) {
+  let res = ""
   let generating = true;
   while (generating === true) {
     let currentCell = getCell(walker.x, walker.y);
     let possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
     let currentComponent = getRandomFromArr(possibleComponents)
+
+    //THIS WORKS BUT WILL REPLACE COMPONENT FOREVER, does not replace choices because choices are on walker
+
+    for (let i = 0; i < currentComponent.variables.length; i++) {
+      if (currentComponent.variables[i].value.includes("runGrid(")) {
+        console.log("VARIABLE")
+        let varRes = "";
+        let m = currentComponent.variables[i].value.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
+        m[1] = replaceVariable(walker, m[1])
+        let lastGrid = g.currentGrid;
+        let lastX = walker.x;
+        let lastY = walker.y;
+        let nextGrid = getGridByName(g, m[1]);
+        varRes += generate(nextGrid, walker);
+        g.currentGrid = lastGrid;
+        walker.x = lastX;
+        walker.y = lastY;
+        currentComponent.variables[i].value = currentComponent.variables[i].value.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, varRes)
+      }
+    }
+    for (let i = 0; i < currentComponent.choices.length; i++) {
+      if (currentComponent.choices[i].text.includes("runGrid(")) {
+        let varRes = "";
+        let m = currentComponent.choices[i].text.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
+        m[1] = replaceVariable(walker, m[1])
+        let lastGrid = g.currentGrid;
+        let lastX = walker.x;
+        let lastY = walker.y;
+        let nextGrid = getGridByName(g, m[1]);
+        varRes += generate(nextGrid, walker);
+        g.currentGrid = lastGrid;
+        walker.x = lastX;
+        walker.y = lastY;
+        currentComponent.choices[i].text = currentComponent.choices[i].text.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, varRes)
+      }
+    }
+
     addComponentTo(walker, currentComponent);
+
     if (currentComponent.text.includes("runGrid(")) {
       let m = currentComponent.text.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
       m[1] = replaceVariable(walker, m[1])
@@ -761,12 +820,12 @@ function genLoop(walker) {
       let lastX = walker.x;
       let lastY = walker.y;
       let nextGrid = getGridByName(g, m[1]);
-      generate(nextGrid, walker);
+      res += generate(nextGrid, walker);
       g.currentGrid = lastGrid;
       walker.x = lastX;
       walker.y = lastY;
     } else {
-      g.output += replaceVariable(walker, currentComponent.text);
+      res += replaceVariable(walker, currentComponent.text);
     }
     let possibleNextCells = createPossibleCellsArr(walker, currentComponent, walker.x, walker.y)
     if (possibleNextCells.length > 0) {
@@ -778,6 +837,7 @@ function genLoop(walker) {
     }
   }
   g.lastWalker = walker;
+  return res;
 }
 
 function addChoiceToWalker(w, c) {
@@ -837,6 +897,16 @@ function addComponentTo(w, comp) {
     for (let i = 0; i < comp.choices.length; i++) {
       g.choices.push(comp.choices[i]);
     }
+  }
+  if (comp.background && comp.background.length > 0) {
+    console.log("BACKGROUND")
+    GID("cell-box").style.backgroundColor = `${comp.background}`
+  }
+  if (comp.color && comp.color.length > 0) {
+    GID("cell-box").style.color = `${comp.color}`
+  }
+  if (comp.img && comp.img.length > 0) {
+    GID("cell-box").style.backgroundImage = `url(${comp.img})`;
   }
 }
 
@@ -970,9 +1040,8 @@ function createPossibleCellsArr(w, component, x, y) {
 }
 
 
-
 function generate(grid, w, continuing) {
-  g.choices = [];
+  let res = "";
   let lastGrid;
   if (grid) {
     lastGrid = g.currentGrid;
@@ -986,12 +1055,11 @@ function generate(grid, w, continuing) {
     walker.x = start.x;
     walker.y = start.y;
   }
-  genLoop(walker);
-
+  res += genLoop(walker);
 
 
   if (lastGrid !== undefined) {
     g.currentGrid = lastGrid
   }
-
+  return res
 }
