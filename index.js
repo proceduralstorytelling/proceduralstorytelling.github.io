@@ -877,8 +877,8 @@ function addComponentTo(w, comp) {
           exists = true;
           if (isComparisonOperator(cv.operation) === false) {
             let newValue = doMath(wv.value, cv.operation, cv.value)
-            w.variables[j].value = newValue;
-            w.variables[j].value = replaceVariable(w, o.value);
+            w.variables[j].value = replaceVariable(w, newValue);
+            //w.variables[j].value = replaceVariable(w, o.value);
           }
         }
       }
