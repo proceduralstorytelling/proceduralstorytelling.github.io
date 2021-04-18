@@ -245,7 +245,7 @@ function getChoiceFromMatch(m, coords) {
   let ry = /y([\-\d]+)/
   o.x = parseInt(coords.match(rx)[1]);
   o.y = parseInt(coords.match(ry)[1]);
-  let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
+  let parens = /\([\w\s\d\,\!\/\'\"\$\.\=\+\-\>\<\%]+\)/g;
   let  parensArr = m.match(parens) || [];
   //o.text = m.replace(parens, "");
   o.text = m;
@@ -275,7 +275,7 @@ function saveCell(g, coords) {
   if (v.length > 0) {
     let o = {};
     let exists = false;
-    let total = /\[[\w\s\+\.\-\=\<\>\!\d\,\:\(\)\$]+\]/g
+    let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%]+\]/g
     let rx = /x([\-\d]+)/
     let ry = /y([\-\d]+)/
 
@@ -293,7 +293,7 @@ function saveCell(g, coords) {
           c.directions = [];
           c.choices = [];
           c.text = components[j].trim();
-          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\,\:\d\(\)\$]+\]/g, "")
+          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%]+\]/g, "")
           let matches = components[j].match(total);
           if (matches) {
             for (let n = 0; n < matches.length; n++) {
@@ -338,7 +338,7 @@ function saveCell(g, coords) {
         c.directions = [];
         c.choices = [];
         c.text = components[j].trim();
-        c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!,\d\.\:\(\)\$]+\]/g, "")
+        c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!\?,\d\.\:\(\)\$\'\"\%]+\]/g, "")
         let matches = components[j].match(total);
         if (matches) {
           for (let n = 0; n < matches.length; n++) {
@@ -878,7 +878,6 @@ function addComponentTo(w, comp) {
           if (isComparisonOperator(cv.operation) === false) {
             let newValue = doMath(wv.value, cv.operation, cv.value)
             w.variables[j].value = replaceVariable(w, newValue);
-            //w.variables[j].value = replaceVariable(w, o.value);
           }
         }
       }
