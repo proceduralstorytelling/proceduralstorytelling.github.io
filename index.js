@@ -202,7 +202,7 @@ function normBrackets(s) {
   s = s.replace("[", "");
   s = s.replace("]", "")
   if (s.includes(",")) {
-    s = s.split(",");
+    s = s.split(/\,\s[A-Za-z]/);
     for (let i = 0; i < s.length; i++) {
       if (s[i].charAt(0) === " ") {
         s[i] = s[i].substring(1);
@@ -227,7 +227,7 @@ function setVariableArray(v) {
 }
 
 function parseVariableFromText(t) {
-  let matches = t.match(/\s?([\w\s\d,\!\(\)\$\.]+)\s([\+\=\-\!\<\>]+)\s([\w\s\d,\!\(\)\$\.]+)/);
+  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\.]+)\s([\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\.]+)/);
   if (matches && matches.length > 0) {
     let o = {};
     o.name = matches[1];
@@ -780,11 +780,12 @@ function genLoop(walker) {
 
 
     addComponentTo(walker, currentComponent);
-
     if (currentComponent.text.includes("runGrid(")) {
       res += runGrids(walker, currentComponent.text)
+      res = runFunctions(walker, res);
     } else {
       res += replaceVariable(walker, currentComponent.text);
+      res = runFunctions(walker, res);
     }
     let possibleNextCells = createPossibleCellsArr(walker, currentComponent, walker.x, walker.y)
     if (possibleNextCells.length > 0) {
@@ -847,7 +848,26 @@ function runGrids(w, t) {
   return t;
 }
 
+function runFunctions(w, t) {
+  let stillT = true;
+  while (stillT === true) {
+    if (t.includes("getRandomInt(")) {
+      let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
+      console.log(m);
+      if (m && m[1] && m[2])  {
+        t = t.replace(/getRandomInt\((\d+)\,\s?(\d+)\)/, getRandomInt(parseInt(m[1]), parseInt(m[2])))
+      } else {
+        stillT = false;
+      }
+    } else {
+      stillT = false;
+    }
+  }
+  return t;
+}
+
 function addComponentTo(w, comp) {
+  console.log(comp);
   if (comp.variables) {
     for (let i = 0; i < comp.variables.length; i++) {
       let exists = false;
@@ -858,11 +878,15 @@ function addComponentTo(w, comp) {
         cv = replaceVariable(w, cv);
         wv.name = runGrids(w, wv.name);
         cv.name = runGrids(w, cv.name)
+        wv.name = runFunctions(w, wv.name);
+        cv.name = runFunctions(w, cv.name)
         if (variablesHaveSameName(wv, cv)) {
           exists = true;
           if (isComparisonOperator(cv.operation) === false) {
             wv.value = runGrids(w, wv.value);
             cv.value = runGrids(w, cv.value);
+            wv.value = runFunctions(w, wv.value);
+            cv.value = runFunctions(w, cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value)
             w.variables[j].value = replaceVariable(w, newValue);
           }
@@ -874,9 +898,11 @@ function addComponentTo(w, comp) {
         o.name = comp.variables[i].name;
         o.name = replaceVariable(w, o.name)
         o.name = runGrids(w, o.name)
-        o.value = doMath(0, comp.variables[i].operation, comp.variables[i].value)
+        o.name = runFunctions(w, o.name)
+        o.value = doMath(0, comp.variables[i].operation, runFunctions(w, comp.variables[i].value))
         o.value = replaceVariable(w, o.value)
         o.value = runGrids(w, o.value)
+        o.value = runFunctions(w, o.value)
         w.variables.push(o);
       }
     }
@@ -885,6 +911,7 @@ function addComponentTo(w, comp) {
     for (let i = 0; i < comp.choices.length; i++) {
       let o = _.cloneDeep(comp.choices[i]);
       o.text = runGrids(w, o.text);
+      o.text = runFunctions(w, o.text);
       console.log(o);
       g.choices.push(o);
     }
