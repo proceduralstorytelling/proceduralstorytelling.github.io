@@ -782,16 +782,7 @@ function genLoop(walker) {
     addComponentTo(walker, currentComponent);
 
     if (currentComponent.text.includes("runGrid(")) {
-      let m = currentComponent.text.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
-      m[1] = replaceVariable(walker, m[1])
-      let lastGrid = g.currentGrid;
-      let lastX = walker.x;
-      let lastY = walker.y;
-      let nextGrid = getGridByName(g, m[1]);
-      res += generate(nextGrid, walker);
-      g.currentGrid = lastGrid;
-      walker.x = lastX;
-      walker.y = lastY;
+      res += runGrids(walker, currentComponent.text)
     } else {
       res += replaceVariable(walker, currentComponent.text);
     }
@@ -833,19 +824,24 @@ function addChoiceToWalker(w, c) {
 }
 
 function runGrids(w, t) {
-  if (t.includes("runGrid(")) {
-    let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
-    for (let i = 1; i < m.length; i++) {
-      let res = "";
-      let lastGrid = g.currentGrid;
-      let lastX = w.x;
-      let lastY = w.y;
-      let nextGrid = getGridByName(g, m[i]);
-      res += generate(nextGrid, w);
-      g.currentGrid = lastGrid;
-      w.x = lastX;
-      w.y = lastY;
-      t = t.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, res)
+  let stillT = true;
+  while (stillT === true) {
+    if (t.includes("runGrid(")) {
+      let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
+      for (let i = 1; i < m.length; i++) {
+        let res = "";
+        let lastGrid = g.currentGrid;
+        let lastX = w.x;
+        let lastY = w.y;
+        let nextGrid = getGridByName(g, m[i]);
+        res += generate(nextGrid, w);
+        g.currentGrid = lastGrid;
+        w.x = lastX;
+        w.y = lastY;
+        t = t.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, res)
+      }
+    } else {
+      stillT = false;
     }
   }
   return t;
