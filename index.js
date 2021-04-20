@@ -777,39 +777,7 @@ function genLoop(walker) {
 
     //THIS WORKS BUT WILL REPLACE COMPONENT FOREVER, does not replace choices because choices are on walker
 
-    for (let i = 0; i < currentComponent.variables.length; i++) {
-      if (currentComponent.variables[i].value.includes("runGrid(")) {
-        console.log("VARIABLE")
-        let varRes = "";
-        let m = currentComponent.variables[i].value.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
-        m[1] = replaceVariable(walker, m[1])
-        let lastGrid = g.currentGrid;
-        let lastX = walker.x;
-        let lastY = walker.y;
-        let nextGrid = getGridByName(g, m[1]);
-        varRes += generate(nextGrid, walker);
-        g.currentGrid = lastGrid;
-        walker.x = lastX;
-        walker.y = lastY;
-        currentComponent.variables[i].value = currentComponent.variables[i].value.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, varRes)
-      }
-    }
-    for (let i = 0; i < currentComponent.choices.length; i++) {
-      if (currentComponent.choices[i].text.includes("runGrid(")) {
-        let varRes = "";
-        let m = currentComponent.choices[i].text.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/)
-        m[1] = replaceVariable(walker, m[1])
-        let lastGrid = g.currentGrid;
-        let lastX = walker.x;
-        let lastY = walker.y;
-        let nextGrid = getGridByName(g, m[1]);
-        varRes += generate(nextGrid, walker);
-        g.currentGrid = lastGrid;
-        walker.x = lastX;
-        walker.y = lastY;
-        currentComponent.choices[i].text = currentComponent.choices[i].text.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, varRes)
-      }
-    }
+
 
     addComponentTo(walker, currentComponent);
 
@@ -864,6 +832,25 @@ function addChoiceToWalker(w, c) {
   }
 }
 
+function runGrids(w, t) {
+  if (t.includes("runGrid(")) {
+    let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
+    for (let i = 1; i < m.length; i++) {
+      let res = "";
+      let lastGrid = g.currentGrid;
+      let lastX = w.x;
+      let lastY = w.y;
+      let nextGrid = getGridByName(g, m[i]);
+      res += generate(nextGrid, w);
+      g.currentGrid = lastGrid;
+      w.x = lastX;
+      w.y = lastY;
+      t = t.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, res)
+    }
+  }
+  return t;
+}
+
 function addComponentTo(w, comp) {
   if (comp.variables) {
     for (let i = 0; i < comp.variables.length; i++) {
@@ -873,9 +860,13 @@ function addComponentTo(w, comp) {
         wv = replaceVariable(w, wv);
         let cv = comp.variables[i];
         cv = replaceVariable(w, cv);
+        wv.name = runGrids(w, wv.name);
+        cv.name = runGrids(w, cv.name)
         if (variablesHaveSameName(wv, cv)) {
           exists = true;
           if (isComparisonOperator(cv.operation) === false) {
+            wv.value = runGrids(w, wv.value);
+            cv.value = runGrids(w, cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value)
             w.variables[j].value = replaceVariable(w, newValue);
           }
@@ -886,15 +877,20 @@ function addComponentTo(w, comp) {
         let o = {};
         o.name = comp.variables[i].name;
         o.name = replaceVariable(w, o.name)
+        o.name = runGrids(w, o.name)
         o.value = doMath(0, comp.variables[i].operation, comp.variables[i].value)
         o.value = replaceVariable(w, o.value)
+        o.value = runGrids(w, o.value)
         w.variables.push(o);
       }
     }
   }
   if (comp.choices.length > 0) {
     for (let i = 0; i < comp.choices.length; i++) {
-      g.choices.push(comp.choices[i]);
+      let o = _.cloneDeep(comp.choices[i]);
+      o.text = runGrids(w, o.text);
+      console.log(o);
+      g.choices.push(o);
     }
   }
   if (comp.background && comp.background.length > 0) {
