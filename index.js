@@ -827,6 +827,7 @@ function addChoiceToWalker(w, c) {
 function runGrids(w, t) {
   let stillT = true;
   while (stillT === true) {
+    console.log(t);
     if (t.includes("runGrid(")) {
       let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
       for (let i = 1; i < m.length; i++) {
@@ -886,7 +887,9 @@ function addComponentTo(w, comp) {
             wv.value = runGrids(w, wv.value);
             cv.value = runGrids(w, cv.value);
             wv.value = runFunctions(w, wv.value);
-            cv.value = runFunctions(w, cv.value);
+            console.log(wv.value)
+            //cv.value = runFunctions(w, cv.value);
+            console.log(cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value)
             w.variables[j].value = replaceVariable(w, newValue);
           }
