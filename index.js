@@ -202,7 +202,7 @@ function normBrackets(s) {
   s = s.replace("[", "");
   s = s.replace("]", "")
   if (s.includes(",")) {
-    s = s.split(/\,\s[A-Za-z]/);
+    s = s.split(/\,\s(?=[A-Za-z])/);
     for (let i = 0; i < s.length; i++) {
       if (s[i].charAt(0) === " ") {
         s[i] = s[i].substring(1);
