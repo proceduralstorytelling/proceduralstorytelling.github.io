@@ -828,7 +828,8 @@ function runGrids(w, t) {
   let stillT = true;
   while (stillT === true) {
     console.log(t);
-    if (t.includes("runGrid(")) {
+    t = `${t}`;
+    if (t && t.includes("runGrid(")) {
       let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
       for (let i = 1; i < m.length; i++) {
         let res = "";
@@ -849,10 +850,24 @@ function runGrids(w, t) {
   return t;
 }
 
+function getRandomColor() {
+  let randomColor = Math.floor(Math.random()*16777215).toString(16);
+  return randomColor;
+}
+
 function runFunctions(w, t) {
   let stillT = true;
   while (stillT === true) {
-    if (t.includes("getRandomInt(")) {
+    t = `${t}`
+    if (t && t.includes("getRandomColor()")) {
+      t = t.replace("getRandomColor()", getRandomColor());
+      console.log(t);
+    } else if (t && t.includes("C(")) {
+      let m = t.match(/C\((\w+)\)/)
+      if (m && m[1]) {
+        t = t.replace(/C\((\w+)\)/, m[1].toUpperCase())
+      }
+    } else if (t && t.includes("getRandomInt(")) {
       let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
       console.log(m);
       if (m && m[1] && m[2])  {
