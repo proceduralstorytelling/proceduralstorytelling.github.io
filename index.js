@@ -862,6 +862,16 @@ function runFunctions(w, t) {
     if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
       console.log(t);
+    } else if (t && t.includes("indent(")) {
+      let m = t.match(/indent\((\d+)\)/)
+      if (m && m[1]){
+        let d = parseInt(m[1]);
+        let indent = "";
+        for (let i = 0; i < d; i++) {
+          indent += "&nbsp&nbsp";
+        }
+        t = t.replace(/indent\(\d+\)/, indent)
+      }
     } else if (t && t.includes("C(")) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {
