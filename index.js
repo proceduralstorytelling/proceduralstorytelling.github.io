@@ -61,86 +61,6 @@ function compare(v, o, nv) {
   }
 }
 
-function variableCheck(c, e) {
-  let equalityChecks = true;
-  let workingArr = [];
-  for (let i = 0; i < c.variables.length; i++) {
-    let name = c.variables[i].name
-    name = replaceVariable(e, name);
-    let op = c.variables[i].operation;
-    let value = c.variables[i].value;
-    value = replaceVariable(e, value);
-    let exists = false;
-    if (e.variables.length === 0 && (op === "===" || op === "<" || op === ">" || op === ">=" || op === "<=")) {
-      //can't compare if doesn't exist
-      equalityChecks = false;
-    } else if (e.variables.length === 0 && op === "!==") {
-      equalityChecks = true;
-    } else {
-      for (let j = 0; j < e.variables.length; j++) {
-        let eName = e.variables[j].name;
-        if (eName === name) {
-          exists = true;
-          if (op === "===" || op === "<" || op === ">" || op === ">=" || op === "<=" || op === "!==") {
-
-            equalityChecks = compare(e.variables[j].value, op, value)
-          }
-        }
-      }
-      if (exists === false) {
-        if (op === "===" || op === "<" || op === ">" || op === ">=" || op === "<=") {
-          equalityChecks = false;
-        } else if (op === "!==") {
-          equalityChecks = true;
-        }
-      }
-    }
-    if (equalityChecks === false) {
-      return equalityChecks;
-    }
-  }
-  return true;
-}
-
-function variableChange(c, e) {
-  for (let i = 0; i < c.variables.length; i++) {
-    let name = c.variables[i].name
-    name = replaceVariable(e, name);
-    let op = c.variables[i].operation;
-    let value = c.variables[i].value;
-    value = replaceVariable(e, value);
-    if (op === "<" || op === ">" || op === "<=" || op === ">=" || op === "!==") {
-
-    } else {
-      let exists = false;
-      if (e.variables.length === 0 && (op === "+=" || op === "-=")) {
-        let newValue = doMath(0, op, value);
-        let o = {};
-        o.name = name;
-        o.value = newValue;
-        e.variables.push(o);
-        exists = true;
-      } else {
-        for (let j = 0; j < e.variables.length; j++) {
-          let eName = e.variables[j].name;
-          if (eName === name) {
-            exists = true;
-            let newValue = doMath(e.variables[j].value, op, value);
-            e.variables[j].value = newValue;
-          }
-        }
-        if (exists === false) {
-          let newValue = doMath(0, op, value);
-          let o = {};
-          o.name = name;
-          o.value = newValue;
-          e.variables.push(o)
-        }
-      }
-    }
-  }
-}
-
 function replaceVariable(e, localization) {
   let regex = /\$[\w\s\.]+\$/g;
   let l = localization;
@@ -717,10 +637,20 @@ function isNumeric(str) {
          !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
 }
 
-function doMath(num1, operator, num2) {
+function doMath(num1, operator, num2, walker) {
+  if (num1) {
+    num1 = runFunctions(walker, num1);
+  }
+  if (num2) {
+    num2 = runFunctions(walker, num2)
+  }
 
   if (operator === "=") {
-    return num2;
+    if (Number.isInteger(num2) || isNumeric(num2)) {
+      return parseInt(num2);
+    } else {
+      return num2;
+    }
   } else {
     if ((Number.isInteger(num1) || isNumeric(num1)) && (Number.isInteger(num2) || isNumeric(num2))) {
       num1 = parseInt(num1);
@@ -808,7 +738,7 @@ function addChoiceToWalker(w, c) {
         if (variablesHaveSameName(w.variables[j], c.variables[i])) {
           exists = true;
           if (isComparisonOperator(c.variables[i].operation) === false) {
-            let newValue = doMath(w.variables[j].value, c.variables[i].operation, c.variables[i].value)
+            let newValue = doMath(w.variables[j].value, c.variables[i].operation, c.variables[i].value, w)
             w.variables[j].value = newValue;
           }
         }
@@ -817,7 +747,7 @@ function addChoiceToWalker(w, c) {
         //address fact that some variables are strings.
         let o = {};
         o.name = c.variables[i].name;
-        o.value = doMath(0, c.variables[i].operation, c.variables[i].value)
+        o.value = doMath(0, c.variables[i].operation, c.variables[i].value, w)
         w.variables.push(o);
       }
     }
@@ -915,7 +845,7 @@ function addComponentTo(w, comp) {
             console.log(wv.value)
             //cv.value = runFunctions(w, cv.value);
             console.log(cv.value);
-            let newValue = doMath(wv.value, cv.operation, cv.value)
+            let newValue = doMath(wv.value, cv.operation, cv.value, w)
             w.variables[j].value = replaceVariable(w, newValue);
           }
         }
@@ -927,7 +857,7 @@ function addComponentTo(w, comp) {
         o.name = replaceVariable(w, o.name)
         o.name = runGrids(w, o.name)
         o.name = runFunctions(w, o.name)
-        o.value = doMath(0, comp.variables[i].operation, runFunctions(w, comp.variables[i].value))
+        o.value = doMath(0, comp.variables[i].operation, runFunctions(w, comp.variables[i].value), w)
         o.value = replaceVariable(w, o.value)
         o.value = runGrids(w, o.value)
         o.value = runFunctions(w, o.value)
