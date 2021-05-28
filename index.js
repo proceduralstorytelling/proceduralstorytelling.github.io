@@ -919,7 +919,7 @@ function runFunctions(w, t) {
         kv.push(o);
         console.log(kv);
       }
-      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:]+),\s([\w\d\s\.\,\?\;\!\:]+)\)/, "")
+      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+]+)\)/, "")
     } else if (t && t.includes("C(")) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {
