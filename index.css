@@ -108,6 +108,7 @@ textarea {
   top: 0;
   position: absolute;
   display: none;
+	overflow: scroll;
 }
 
 .tooltip {
