@@ -198,6 +198,7 @@ function saveCell(g, coords) {
     let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%]+\]/g
     let rx = /x([\-\d]+)/
     let ry = /y([\-\d]+)/
+    let digits = /\[(\d+)\]/
 
     for (let i = 0; i < g.currentGrid.cellArray.length; i++) {
 
@@ -217,6 +218,13 @@ function saveCell(g, coords) {
           let matches = components[j].match(total);
           if (matches) {
             for (let n = 0; n < matches.length; n++) {
+              let dig = matches[n].match(digits);
+              if (dig) {
+                c.probability = dig[1];
+                console.log(c.probability);
+                matches[n] = matches[n].replace(/\[(\d+)\]/, "")
+                console.log(matches[n])
+              }
               if (matches[n].includes("[START]")) {
                 c.start = true;
               } else if (matches[n].includes("choice:")) {
@@ -262,6 +270,13 @@ function saveCell(g, coords) {
         let matches = components[j].match(total);
         if (matches) {
           for (let n = 0; n < matches.length; n++) {
+            let dig = matches[n].match(digits);
+            if (dig) {
+              c.probability = dig[1];
+              console.log(c.probability);
+              matches[n] = matches[n].replace(/\[(\d+)\]/, "")
+              console.log(matches[n])
+            }
             if (matches[n].includes("[START]")) {
               c.start = true;
             } else if (matches[n].includes("choice:")) {
@@ -741,6 +756,32 @@ function getWalker(start, w) {
 }
 
 
+function getComponent(possible) {
+  let totalProb = 0;
+  for (let i = 0; i < possible.length; i++) {
+    if (possible[i].probability) {
+      totalProb += parseInt(possible[i].probability)
+    } else {
+      totalProb += 100;
+    }
+  }
+  let rand = getRandomInt(0, totalProb)
+  let countProb = 0;
+  for (let i = 0; i < possible.length; i++) {
+    let lowProb = countProb;
+    if (possible[i].probability) {
+      countProb += parseInt(possible[i].probability)
+    } else {
+      countProb += 100;
+    }
+    let highProb = countProb;
+    if (rand >= lowProb && rand <= highProb) {
+      console.log(rand);
+      return possible[i];
+    }
+  }
+}
+
 
 function genLoop(walker) {
   let res = ""
@@ -748,7 +789,7 @@ function genLoop(walker) {
   while (generating === true) {
     let currentCell = getCell(walker.x, walker.y);
     let possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
-    let currentComponent = getRandomFromArr(possibleComponents)
+    let currentComponent = getComponent(possibleComponents)
 
     //THIS WORKS BUT WILL REPLACE COMPONENT FOREVER, does not replace choices because choices are on walker
 
