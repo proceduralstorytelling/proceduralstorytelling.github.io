@@ -208,36 +208,28 @@ textarea {
 	margin-bottom: 30px;
 }
 
+.grid-buttons {
+	background: #bdc3c7;
+	color: black;
+	font-size: 2em;
+	text-align: center;
+	font-family: serif;
+	border: 1px solid black;
+}
+
+.grid-buttons:hover {
+	cursor: pointer;
+	background: #2980b9;
+	color: #bdc3c7;
+}
+
 #add-grid-button {
 	padding-top: 10px;
 	padding-bottom: 10px;
-	background: #bdc3c7;
-	color: black;
-	font-size: 3em;
-	text-align: center;
-	font-family: serif;
 }
 
 #delete-grid-button {
-	border-top: 1px solid black;
 	padding-bottom: 10px;
-	background: #bdc3c7;
-	color: black;
-	font-size: 3em;
-	text-align: center;
-	font-family: serif;
-}
-
-#add-grid-button:hover {
-	cursor: pointer;
-	background: #2980b9;
-	color: #bdc3c7;
-}
-
-#delete-grid-button:hover {
-	cursor: pointer;
-	background: #2980b9;
-	color: #bdc3c7;
 }
 
 a {

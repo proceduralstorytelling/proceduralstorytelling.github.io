@@ -425,8 +425,9 @@ GID("gridicon").onclick = function() {
   showHide("grid-select-box");
   GID("grid-select-box").innerHTML = "";
   let t = "";
-  t += "<p id=add-grid-button>Add Grid</p>";
-  t += "<p id=delete-grid-button>Delete Grid</p>"
+  t += "<p class=grid-buttons id=add-grid-button>Add Grid</p>";
+  t += "<p class=grid-buttons id=rename-grid-button>Rename Grid</p>";
+  t += "<p class=grid-buttons id=delete-grid-button>Delete Grid</p>"
   for (let i = 0; i < g.grids.length; i++) {
     console.log(g.grids);
     console.log(g.gridIndex);
@@ -455,6 +456,11 @@ GID("gridicon").onclick = function() {
     g.grids.splice(g.gridIndex, 1)
     resetGridSelect();
   }
+  GID("rename-grid-button").onclick = function() {
+    let gridName = prompt("Name of Grid?")
+    g.grids[g.gridIndex].name = gridName;
+    resetGridSelect();
+  }
 }
 let counter = 0
 
@@ -462,8 +468,9 @@ function resetGridSelect() {
   console.log(g);
   GID("grid-select-box").innerHTML = "";
   let t = "";
-  t += "<p id=add-grid-button>Add Grid</p>";
-  t += "<p id=delete-grid-button>Delete Grid</p>";
+  t += "<p class=grid-buttons id=add-grid-button>Add Grid</p>";
+  t += "<p class=grid-buttons id=rename-grid-button>Rename Grid</p>";
+  t += "<p class=grid-buttons id=delete-grid-button>Delete Grid</p>"
   for (let i = 0; i < g.grids.length; i++) {
     if (g.gridIndex === i) {
       t += `<p class="grid-list selected-grid">${g.grids[i].name}</p>`
@@ -490,6 +497,11 @@ function resetGridSelect() {
   GID("delete-grid-button").onclick = function() {
     g.grids.splice(g.gridIndex, 1)
     g.gridIndex = 0;
+    resetGridSelect();
+  }
+  GID("rename-grid-button").onclick = function() {
+    let gridName = prompt("Name of Grid?")
+    g.grids[g.gridIndex].name = gridName;
     resetGridSelect();
   }
 }
