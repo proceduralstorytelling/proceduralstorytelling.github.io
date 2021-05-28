@@ -902,6 +902,26 @@ function runFunctions(w, t) {
         }
         t = t.replace(/indent\(\d+\)/, indent)
       }
+    } else if (t && t.includes("replaceKey(")) {
+      let m = t.match(/replaceKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
+      let exists = false;
+      for (let i = 0; i < kv.length; i++) {
+        if (kv[i].k === m[1]) {
+          exists = true
+          kv[i].v = ` ${m[2]}`
+          kv[i].lastChange = 0;
+        }
+      }
+      if (exists === false) {
+        let o = {};
+        o.k = m[1];
+        o.v = m[2];
+        //lastChange is an experimental value that one could use to track the forgetting of knowledge over time. No use at moment.
+        o.lastChange = 0;
+        kv.push(o);
+        console.log(kv);
+      }
+      t = t.replace(/replaceKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
     } else if (t && t.includes("addKey(")) {
       console.log("addkey");
       let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
@@ -910,12 +930,14 @@ function runFunctions(w, t) {
         if (kv[i].k === m[1]) {
           exists = true
           kv[i].v += ` ${m[2]}`
+          kv[i].lastChange = 0;
         }
       }
       if (exists === false) {
         let o = {};
         o.k = m[1];
         o.v = m[2];
+        o.lastChange = 0;
         kv.push(o);
         console.log(kv);
       }
