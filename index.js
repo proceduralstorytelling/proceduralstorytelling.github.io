@@ -537,9 +537,19 @@ function runGenerationProcess(grid, w) {
   g.output = "";
   if (grid && w) {
     let t = generate(grid, w, true);
+    for (let i = 0; i < kv.length; i++) {
+      if (t.includes(`${kv[i].k}`)) {
+        t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
+      }
+    }
     GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   } else {
     let t = generate();
+    for (let i = 0; i < kv.length; i++) {
+      if (t.includes(`${kv[i].k}`)) {
+        t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
+      }
+    }
     GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   }
 
@@ -578,6 +588,7 @@ function runGenerationProcess(grid, w) {
 }
 
 GID("generateicon").onclick = function() {
+  kv = [];
   runGenerationProcess();
 }
 
@@ -871,6 +882,9 @@ function getRandomColor() {
   return randomColor;
 }
 
+let kv = [];
+
+
 function runFunctions(w, t) {
   let stillT = true;
   while (stillT === true) {
@@ -888,6 +902,24 @@ function runFunctions(w, t) {
         }
         t = t.replace(/indent\(\d+\)/, indent)
       }
+    } else if (t && t.includes("addKey(")) {
+      console.log("addkey");
+      let m = t.match(/addKey\(([\w\d\s]+),\s([\w\d\s]+)\)/)
+      let exists = false;
+      for (let i = 0; i < kv.length; i++) {
+        if (kv[i].k === m[1]) {
+          exists = true
+          kv[i].v += ` ${m[2]}`
+        }
+      }
+      if (exists === false) {
+        let o = {};
+        o.k = m[1];
+        o.v = m[2];
+        kv.push(o);
+        console.log(kv);
+      }
+      t = t.replace(/addKey\(([\w\d\s]+),\s([\w\d\s]+)\)/, "")
     } else if (t && t.includes("C(")) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {
