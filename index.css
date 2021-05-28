@@ -192,6 +192,10 @@ textarea {
 	font-size: 2em
 }
 
+.selected-grid {
+	color: green;
+}
+
 .grid-list:hover {
 	cursor: pointer;
 	color: green;
@@ -213,7 +217,23 @@ textarea {
 	font-family: serif;
 }
 
+#delete-grid-button {
+	border-top: 1px solid black;
+	padding-bottom: 10px;
+	background: #bdc3c7;
+	color: black;
+	font-size: 3em;
+	text-align: center;
+	font-family: serif;
+}
+
 #add-grid-button:hover {
+	cursor: pointer;
+	background: #2980b9;
+	color: #bdc3c7;
+}
+
+#delete-grid-button:hover {
 	cursor: pointer;
 	background: #2980b9;
 	color: #bdc3c7;

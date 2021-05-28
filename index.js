@@ -420,56 +420,89 @@ GID("settingsicon").onclick = function() {
 GID("cell-box").onclick = function() {
   //showHide("cell-box");
 }
-
+g.gridIndex = 0;
 GID("gridicon").onclick = function() {
   showHide("grid-select-box");
   GID("grid-select-box").innerHTML = "";
   let t = "";
   t += "<p id=add-grid-button>Add Grid</p>";
+  t += "<p id=delete-grid-button>Delete Grid</p>"
   for (let i = 0; i < g.grids.length; i++) {
-    t += `<p class="grid-list">${g.grids[i].name}</p>`
+    console.log(g.grids);
+    console.log(g.gridIndex);
+    console.log(i)
+    if (g.gridIndex === i) {
+      t += `<p class="grid-list selected-grid">${g.grids[i].name}</p>`
+    } else {
+      t += `<p class="grid-list">${g.grids[i].name}</p>`
+    }
   }
   GID("grid-select-box").innerHTML += t;
   let els = document.getElementsByClassName("grid-list");
   for (let i = 0; i < els.length; i++) {
     els[i].onclick = function() {
       g.currentGrid = g.grids[i]
+      g.gridIndex = i;
       drawGrid();
       GID("grid-select-box").style.display = "none";
     }
   }
   GID("add-grid-button").onclick = function() {
     addGrid();
+    resetGridSelect();
+  }
+  GID("delete-grid-button").onclick = function() {
+    g.grids.splice(g.gridIndex, 1)
+    resetGridSelect();
   }
 }
 let counter = 0
+
+function resetGridSelect() {
+  console.log(g);
+  GID("grid-select-box").innerHTML = "";
+  let t = "";
+  t += "<p id=add-grid-button>Add Grid</p>";
+  t += "<p id=delete-grid-button>Delete Grid</p>";
+  for (let i = 0; i < g.grids.length; i++) {
+    if (g.gridIndex === i) {
+      t += `<p class="grid-list selected-grid">${g.grids[i].name}</p>`
+    } else {
+      t += `<p class="grid-list">${g.grids[i].name}</p>`
+    }
+
+  }
+  console.log(t);
+  GID("grid-select-box").innerHTML += t;
+  let els = document.getElementsByClassName("grid-list");
+  for (let i = 0; i < els.length; i++) {
+    els[i].onclick = function() {
+      g.currentGrid = g.grids[i]
+      g.gridIndex = i;
+      drawGrid();
+      GID("grid-select-box").style.display = "none";
+    }
+  }
+  GID("add-grid-button").onclick = function() {
+    addGrid();
+    resetGridSelect();
+  }
+  GID("delete-grid-button").onclick = function() {
+    g.grids.splice(g.gridIndex, 1)
+    g.gridIndex = 0;
+    resetGridSelect();
+  }
+}
 
 function addGrid() {
   let gridName = prompt("Name of Grid?")
   counter += 1;
   g.grids.push(createGrid(`${gridName}`))
-  GID("grid-select-box").innerHTML = "";
-  let t = "";
-  t += "<p id=add-grid-button>Add Grid</p>";
-  for (let i = 0; i < g.grids.length; i++) {
-    t += `<p class="grid-list">${g.grids[i].name}</p>`
-  }
-  GID("grid-select-box").innerHTML += t;
-  let els = document.getElementsByClassName("grid-list");
-  for (let i = 0; i < els.length; i++) {
-    els[i].onclick = function() {
-      g.currentGrid = g.grids[i]
-      drawGrid();
-      GID("grid-select-box").style.display = "none";
-    }
-  }
-  GID("add-grid-button").onclick = function() {
-    addGrid();
-  }
 }
 
 GID("add-grid-button").onclick = function() {
   addGrid();
+  resetGridSelect();
 }
 
 function runGenerationProcess(grid, w) {
