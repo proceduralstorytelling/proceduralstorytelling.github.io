@@ -904,7 +904,7 @@ function runFunctions(w, t) {
       }
     } else if (t && t.includes("addKey(")) {
       console.log("addkey");
-      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:]+),\s([\w\d\s\.\!\?\;\:]+)\)/)
+      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
         if (kv[i].k === m[1]) {
