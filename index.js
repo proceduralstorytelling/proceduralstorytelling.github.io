@@ -904,7 +904,7 @@ function runFunctions(w, t) {
       }
     } else if (t && t.includes("addKey(")) {
       console.log("addkey");
-      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+]+)\)/)
+      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
         if (kv[i].k === m[1]) {
@@ -919,7 +919,7 @@ function runFunctions(w, t) {
         kv.push(o);
         console.log(kv);
       }
-      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+]+)\)/, "")
+      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
     } else if (t && t.includes("C(")) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {
