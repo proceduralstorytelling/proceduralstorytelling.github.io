@@ -191,8 +191,53 @@ function getChoiceFromMatch(m, coords) {
 }
 
 function saveCell(g, coords) {
+  let rx = /x([\-\d]+)/
+  let ry = /y([\-\d]+)/
   let v = GID(`${coords}`).value
-  if (v.length > 0) {
+  if (v.length > 0 && v.includes("BREAK(")) {
+    let m = v.match(/BREAK\(([\s\S]+)\)END/);
+    if (m && m[1]) {
+      let x = parseInt(coords.match(rx)[1]);
+      let y = parseInt(coords.match(ry)[1]);
+      let arr = m[1].split(/\s/);
+      for (let i = 0; i < arr.length; i++) {
+        let cell = {};
+        let o = {};
+        if (i === 0) {
+          cell.unprocessed = `${arr[i]} [E]`
+          o.text = `${arr[i]}`
+        } else if (i === arr.length - 1) {
+          cell.unprocessed = `${arr[i]} `
+          o.text = ` ${arr[i]}`
+        } else {
+          cell.unprocessed = ` ${arr[i]} [E]`;
+          o.text = ` ${arr[i]}`;
+        }
+        cell.coords = `x${x}y${y}`;
+        cell.x = x;
+        cell.y = y;
+
+        let cArr = [];
+
+
+
+        o.variables = [];
+        if (i === arr.length - 1) {
+          o.directions = [];
+        }  else {
+          o.directions = ["E"];
+        }
+
+        o.choices = [];
+        x += 1;
+        cArr.push(o);
+        cell.components = cArr;
+        g.currentGrid.cellArray.push(cell);
+
+      }
+      drawGrid();
+    }
+  } else if (v.length > 0) {
     let o = {};
     let exists = false;
     let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%]+\]/g
@@ -798,7 +843,9 @@ function genLoop(walker) {
   let res = ""
   let generating = true;
   while (generating === true) {
+    console.log(walker.x, walker.y);
     let currentCell = getCell(walker.x, walker.y);
+    console.log(currentCell);
     let possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
     let currentComponent = getComponent(possibleComponents)
 
@@ -1135,7 +1182,8 @@ function createPossibleCellsArr(w, component, x, y) {
         //check cell from direction to see if at least one component does not conflict
         let conflicts = true;
 
-
+        console.log(x, y);
+        console.log(dir);
         for (let j = 0; j < dir.components.length; j++) {
           if (variablesConflict(w, dir.components[j]) === false) {
             conflicts = false;
