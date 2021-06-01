@@ -240,7 +240,7 @@ function saveCell(g, coords) {
   } else if (v.length > 0) {
     let o = {};
     let exists = false;
-    let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%]+\]/g
+    let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%\/]+\]/g
     let rx = /x([\-\d]+)/
     let ry = /y([\-\d]+)/
     let digits = /\[(\d+)\]/
@@ -259,7 +259,7 @@ function saveCell(g, coords) {
           c.directions = [];
           c.choices = [];
           c.text = components[j].trim();
-          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%]+\]/g, "")
+          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
           let matches = components[j].match(total);
           if (matches) {
             for (let n = 0; n < matches.length; n++) {
@@ -601,11 +601,11 @@ function runGenerationProcess(grid, w) {
 
   GID("cell-box").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
-    let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<]+\)/g;
+    let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<\/\"\']+\)/g;
     //WORKING HERE
     let num = n;
     let t = g.choices[n].text.replace(parens, "")
-    GID("choices-box").innerHTML += `<p class=choiceslist id=choice${num}>${replaceVariable(g.lastWalker, t)}</p>`
+    GID("choices-box").innerHTML += `<div class=choiceslist id=choice${num}>${replaceVariable(g.lastWalker, t)}</div>`
   }
   let els = document.getElementsByClassName("choiceslist");
   for (let n = 0; n < els.length; n++) {
