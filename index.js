@@ -578,10 +578,16 @@ GID("add-grid-button").onclick = function() {
 }
 
 function runGenerationProcess(grid, w) {
-  GID("cell-box").innerHTML = "";
   g.output = "";
   if (grid && w) {
     let t = generate(grid, w, true);
+    if (t.includes("keep()")) {
+      t = t.replace(/keep\(\)/g, "")
+      console.log(t);
+    } else {
+      GID("cell-box").innerHTML = "";
+    }
+
     for (let i = 0; i < kv.length; i++) {
       if (t.includes(`${kv[i].k}`)) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
@@ -590,6 +596,13 @@ function runGenerationProcess(grid, w) {
     GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   } else {
     let t = generate();
+    if (t.includes("keep()")) {
+      t = t.replace(/keep\(\)/g, "")
+      console.log(t);
+    } else {
+      GID("cell-box").innerHTML = "";
+    }
+
     for (let i = 0; i < kv.length; i++) {
       if (t.includes(`${kv[i].k}`)) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
@@ -901,7 +914,6 @@ function addChoiceToWalker(w, c) {
 function runGrids(w, t) {
   let stillT = true;
   while (stillT === true) {
-    console.log(t);
     t = `${t}`;
     if (t && t.includes("runGrid(")) {
       let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
