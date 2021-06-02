@@ -939,6 +939,10 @@ function runFunctions(w, t) {
     if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
       console.log(t);
+    } else if (t && t.includes("grid()")) {
+      t = t.replace("grid()", `${g.currentGrid.name}`)
+    }else if (t && t.includes("coords()")) {
+      t = t.replace("coords()", `x:${w.x}y:${w.y}`);
     } else if (t && t.includes("indent(")) {
       let m = t.match(/indent\((\d+)\)/)
       if (m && m[1]){
