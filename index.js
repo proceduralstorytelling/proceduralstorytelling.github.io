@@ -2,6 +2,41 @@
 //INCORPORATE WEIGHTING OF DIRECTIONAL MOVEMENT
 //COMPONENT PROBABILITY
 
+let noiseArr = [];
+for (let i = 0; i < 10; i++) {
+  let simp = new SimplexNoise();
+  simp.uid = i;
+  noiseArr.push(simp);
+}
+
+function noise(uid, nx, ny) {
+  let s;
+  for (let i = 0; i < noiseArr.length; i++) {
+    if (noiseArr[i].uid === i) {
+      s = noiseArr[i]
+    }
+  }
+  return s.noise2D(nx, ny) / 2 + 0.5;
+}
+
+function noiseAt(uid, nx, ny, at) {
+  let s;
+  for (let i = 0; i < noiseArr.length; i++) {
+    if (noiseArr[i].uid === i) {
+      s = noiseArr[i]
+    }
+  }
+  let res = `${s.noise2D(nx, ny) / 2 + 0.5}`.split("");
+  console.log(res);
+  if (res && res[at]) {
+    return res[at]
+  } else {
+    return 0;
+  }
+}
+
+console.log(noise(1, 1, 500))
+
 let globalFontSize = 9;
 
 function GID(el) {
@@ -951,6 +986,14 @@ function runFunctions(w, t) {
     if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
       console.log(t);
+    } else if (t && t.includes("noise(")) {
+      let m = t.match(/noise\(([\w\d]+)\,\s(\d+)\,\s(\d+)\)/)
+      console.log(m);
+      t = t.replace(/noise\([\w\d]+\,\s\d+\,\s\d+\)/, `${noise(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]))}`)
+    } else if (t && t.includes("noiseAt(")) {
+      let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
+      console.log(m);
+      t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
     } else if (t && t.includes("grid()")) {
       t = t.replace("grid()", `${g.currentGrid.name}`)
     }else if (t && t.includes("coords()")) {
