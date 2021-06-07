@@ -998,9 +998,9 @@ function runFunctions(w, t) {
       t = t.replace("grid()", `${g.currentGrid.name}`)
     } else if (t && t.includes("coords()")) {
       t = t.replace("coords()", `x:${w.x}y:${w.y}`);
-    } else if (t && t.includes("x()") {
+    } else if (t && t.includes("x()")) {
       t = t.replace("x()", `${w.x}`)
-    } else if (t && t.includes("y()") {
+    } else if (t && t.includes("y()")) {
       t = t.replace("y()", `${w.y}`)
     } else if (t && t.includes("indent(")) {
       let m = t.match(/indent\((\d+)\)/)
