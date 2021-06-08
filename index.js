@@ -313,12 +313,12 @@ function saveCell(g, coords) {
           c.choices = [];
           c.text = components[j].trim();
           if (c.text.includes("teleport(")) {
-            let m = c.text.match(/teleport\(([\w\d\$]+)\,\s([\d\-]+)\,\s([\d\-]+)\)/)
+            let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
             c.teleport = {};
             c.teleport.gridName = m[1];
             c.teleport.x = m[2];
             c.teleport.y = m[3]
-            c.text = c.text.replace(/teleport\([\w\$\d\s\,\-]+\)/, "")
+            c.text = c.text.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
             /*currentCell = getCell(walker.x, walker.y);
             possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
             currentComponent = getComponent(possibleComponents);*/
@@ -376,12 +376,12 @@ function saveCell(g, coords) {
         c.choices = [];
         c.text = components[j].trim();
         if (c.text.includes("teleport(")) {
-          let m = c.text.match(/teleport\(([\w\d\$]+)\,\s([\d\-]+)\,\s([\d\-]+)\)/)
+          let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
           c.teleport = {};
           c.teleport.gridName = m[1];
           c.teleport.x = m[2];
           c.teleport.y = m[3]
-          c.text = c.text.replace(/teleport\([\w\$\d\s\,\-]+\)/, "")
+          c.text = c.text.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
           /*currentCell = getCell(walker.x, walker.y);
           possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
           currentComponent = getComponent(possibleComponents);*/
@@ -963,9 +963,12 @@ function genLoop(walker) {
       let gridName = replaceVariable(walker, currentComponent.teleport.gridName);
       let x = replaceVariable(walker, walker.x);
       let y = replaceVariable(walker, walker.y);
+      gridName = gridName.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
+      x = `${x}`.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
+      y = `${y}`.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
       g.currentGrid = getGridByName(g, gridName);
-      walker.x = currentComponent.teleport.x;
-      walker.y = currentComponent.teleport.y;
+      walker.x = replaceVariable(walker, currentComponent.teleport.x);
+      walker.y = replaceVariable(walker, currentComponent.teleport.y);
       /*currentCell = getCell(walker.x, walker.y);
       possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
       currentComponent = getComponent(possibleComponents);*/
