@@ -248,3 +248,10 @@ a {
 	cursor: pointer;
 	color: green;
 }
+
+#gridinfo {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	color: black;
+}

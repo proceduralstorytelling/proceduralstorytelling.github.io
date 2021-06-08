@@ -476,9 +476,17 @@ function drawGrid(fontSize) {
     } else {
       els[i].style.fontSize = `${globalFontSize}px`;
     }
+    els[i].onclick = function() {
+      let coords = els[i].id;
+      GID("gridinfo").innerHTML = `Grid: ${g.currentGrid.name}, ${coords}`
+    }
     els[i].onblur = function() {
       let coords = els[i].id;
       saveCell(g, coords);
+    }
+    els[i].onmouseover = function() {
+      let coords = els[i].id;
+      GID("gridinfo").innerHTML = `Grid: ${g.currentGrid.name}, ${coords}`
     }
   }
 }
