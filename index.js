@@ -97,17 +97,34 @@ function compare(v, o, nv) {
 }
 
 function replaceVariable(e, localization) {
-  let regex = /\$[\w\s\.]+\$/g;
+  let regex = /\$\{[\w\s\.]+\}/;
   let l = localization;
+  console.log(l);
   if (l && l.length > 0) {
-    let matches = l.match(regex);
-    if (matches) {
-      for (let j = 0; j < matches.length; j++) {
-
-        let noDollars = matches[j].replace(/\$/g, "")
-        for (let n = 0; n <  e.variables.length; n++) {
-          if (noDollars && e.variables[n].name === noDollars) {
-            l = l.replace(matches[j], e.variables[n].value)
+    if (l.match(regex) && l.match(regex).length > 0) {
+      console.log(l.match(regex))
+      let openers = l.match(/\${/g);
+      let closers = l.match(/\}/g);
+      if (openers.length !== closers.length) {
+        console.log(`Bracket mismatch in ${l}`)
+      } else {
+        while (l.includes("${")) {
+          console.log("${}")
+          let matches = l.match(regex);
+          if (matches) {
+            let noDollars = matches[0].replace(/\${/, "").replace(/\}/, "");
+            console.log(noDollars);
+            let exists = false;
+            for (let n = 0; n <  e.variables.length; n++) {
+              if (noDollars && e.variables[n].name === noDollars) {
+                l = l.replace(matches[0], e.variables[n].value)
+                exists = true;
+              }
+            }
+            if (exists === false) {
+              l = l.replace(matches[0], "")
+              console.log(`The variable ${matches[0]} did not exist for interpolation.`)
+            }
           }
         }
       }
@@ -276,7 +293,7 @@ function saveCell(g, coords) {
   } else if (v.length > 0) {
     let o = {};
     let exists = false;
-    let total = /\[[\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%\/]+\]/g
+    let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%\/]+\]/g
     let rx = /x([\-\d]+)/
     let ry = /y([\-\d]+)/
     let digits = /\[(\d+)\]/
@@ -306,7 +323,7 @@ function saveCell(g, coords) {
             possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
             currentComponent = getComponent(possibleComponents);*/
           }
-          c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
+          c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
           let matches = components[j].match(total);
           if (matches) {
             for (let n = 0; n < matches.length; n++) {
@@ -369,7 +386,7 @@ function saveCell(g, coords) {
           possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
           currentComponent = getComponent(possibleComponents);*/
         }
-        c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!\?,\d\.\:\(\)\$\'\"\%]+\]/g, "")
+        c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\-\\!\?,\d\.\:\(\)\$\'\"\%]+\]/g, "")
         let matches = components[j].match(total);
         if (matches) {
           for (let n = 0; n < matches.length; n++) {
@@ -1252,11 +1269,13 @@ function createPossibleCellsArr(w, component, x, y) {
   //component is a misnomer here, also can take choices
   let dArr = [];
   if (component.directions && component.directions.length > 0) {
+
     for (let i = 0; i < component.directions.length; i++) {
       let targetX = parseInt(x);
       let targetY = parseInt(y);
       let validDirection = true;
       let d = component.directions[i];
+      d = replaceVariable(w, component.directions[i])
 
       if (d === "E") {
         targetX += 1;
