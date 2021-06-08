@@ -229,6 +229,7 @@ function saveCell(g, coords) {
   let rx = /x([\-\d]+)/
   let ry = /y([\-\d]+)/
   let v = GID(`${coords}`).value
+  let teleport;
   if (v.length > 0 && v.includes("BREAK(")) {
     let m = v.match(/BREAK\(([\s\S]+)\)END/);
     if (m && m[1]) {
@@ -294,6 +295,17 @@ function saveCell(g, coords) {
           c.directions = [];
           c.choices = [];
           c.text = components[j].trim();
+          if (c.text.includes("teleport(")) {
+            let m = c.text.match(/teleport\(([\w\d\$]+)\,\s([\d\-]+)\,\s([\d\-]+)\)/)
+            c.teleport = {};
+            c.teleport.gridName = m[1];
+            c.teleport.x = m[2];
+            c.teleport.y = m[3]
+            c.text = c.text.replace(/teleport\([\w\$\d\s\,\-]+\)/, "")
+            /*currentCell = getCell(walker.x, walker.y);
+            possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
+            currentComponent = getComponent(possibleComponents);*/
+          }
           c.text = c.text.replace(/\[[\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
           let matches = components[j].match(total);
           if (matches) {
@@ -346,6 +358,17 @@ function saveCell(g, coords) {
         c.directions = [];
         c.choices = [];
         c.text = components[j].trim();
+        if (c.text.includes("teleport(")) {
+          let m = c.text.match(/teleport\(([\w\d\$]+)\,\s([\d\-]+)\,\s([\d\-]+)\)/)
+          c.teleport = {};
+          c.teleport.gridName = m[1];
+          c.teleport.x = m[2];
+          c.teleport.y = m[3]
+          c.text = c.text.replace(/teleport\([\w\$\d\s\,\-]+\)/, "")
+          /*currentCell = getCell(walker.x, walker.y);
+          possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
+          currentComponent = getComponent(possibleComponents);*/
+        }
         c.text = c.text.replace(/\[[\w\s\=\<\>\+\-\\!\?,\d\.\:\(\)\$\'\"\%]+\]/g, "")
         let matches = components[j].match(total);
         if (matches) {
@@ -910,7 +933,18 @@ function genLoop(walker) {
       res = runFunctions(walker, res);
     }
     let possibleNextCells = createPossibleCellsArr(walker, currentComponent, walker.x, walker.y)
-    if (possibleNextCells.length > 0) {
+
+    if (currentComponent.teleport) {
+      let gridName = replaceVariable(walker, currentComponent.teleport.gridName);
+      let x = replaceVariable(walker, walker.x);
+      let y = replaceVariable(walker, walker.y);
+      g.currentGrid = getGridByName(g, gridName);
+      walker.x = currentComponent.teleport.x;
+      walker.y = currentComponent.teleport.y;
+      /*currentCell = getCell(walker.x, walker.y);
+      possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
+      currentComponent = getComponent(possibleComponents);*/
+    } else if (possibleNextCells.length > 0) {
       let nextCell = getRandomFromArr(possibleNextCells);
       walker.x = nextCell.x;
       walker.y = nextCell.y;
@@ -1208,8 +1242,8 @@ function createPossibleCellsArr(w, component, x, y) {
     g.currentGrid = getGridByName(g, component.gridName)
   }
   //component is a misnomer here, also can take choices
+  let dArr = [];
   if (component.directions && component.directions.length > 0) {
-    let dArr = [];
     for (let i = 0; i < component.directions.length; i++) {
       let targetX = parseInt(x);
       let targetY = parseInt(y);
