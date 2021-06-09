@@ -8,6 +8,31 @@
   </head>
   <body>
 
+    <div id="landing">
+      <div id="landing-box">
+        <h1 class="centered black-and-white">Grammar Jammer</h1>
+        <div id="landing-inside-box">
+          <p>Grammar Jammer is an open source replacement grammar creation tool for context-sensitive procedural text generation. A basic video tutorial is available <a href="https://youtu.be/TZVSRK8CgwM">here</a>. If you have questions, feel free to contact me on <a href="https://twitter.com/proceduralstory">Twitter</a>, <a href="https://https://www.youtube.com/channel/UC82CE0l5S1NeCMRGjmQba9A">Youtube</a>, or the <a href="https://github.com/proceduralstorytelling/proceduralstorytelling.github.io">Github project page</a>.</p>
+          <p id="gogram">Proceed to Grammar Jammer Tool</p>
+          <p><b style="font-weight: bold">June 9, 2021 Change Log:</b></p>
+          <p>Variable interpolation now uses a JS-like ${name} syntax instead of the $name$ syntax described in the basic tutorial video. This allows nested variable interpolation. Example:</p>
+          <code>
+            The ${person.name} went to the ${store.name} to buy a ${product}.
+          </code>
+          <hr>
+          <p>A teleport() function now allows you to create a component that directs the generator to move to any cell on any grid. The generator will move to the specified cell and continue generating. The syntax is:</p>
+          <code>
+            teleport(gridName, x, y)
+          </code>
+          <p>A helper has been placed on the bottom right of the screen showing the grid name and x/y coordinates of any hovered cell.</p>
+          <hr>
+          <p>A noise() function now returns 2d noise of the current cell's x/y coordinates. A noiseAt(num) function now returns a single digit at a specified value of the noise() function. For example, if noise() returns 0.5, noiseAt(2) would return 5.</p>
+          <hr>
+          <p>Writing keep() in any cell will specify that the output of that generation run will persist the next time you press the generate button.</p>
+        </div>
+      </div>
+    </div>
+
     <div id="grid">
 
     </div>

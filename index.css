@@ -1,6 +1,6 @@
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
+a, abbr, acronym, address, big, cite,
 del, dfn, em, img, ins, kbd, q, s, samp,
 small, strike, strong, sub, sup, tt, var,
 b, u, i, center,
@@ -26,9 +26,7 @@ footer, header, hgroup, menu, nav, section {
 body {
 	line-height: 1;
 }
-ol, ul {
-	list-style: none;
-}
+
 blockquote, q {
 	quotes: none;
 }
@@ -258,4 +256,66 @@ a {
 
 .centered {
 	text-align: center;
+}
+
+#landing {
+	position: absolute;
+	z-index: 50000;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(40, 42, 54, 0.3);
+	color: #bdc3c7;
+}
+
+#landing-box {
+	width: 70vh;
+	height: 50vh;
+	margin-top: 25vh;
+	margin-left: auto;
+	margin-right: auto;
+	background: white;
+	border: 3px solid black;
+	box-shadow: 1px 1px 1px black;
+	color: black;
+	overflow: scroll;
+}
+
+#landing-box a {
+	color: #16a085;
+}
+
+#gogram {
+	background: #16a085;
+	color: white;
+	text-align: center;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+#gogram:hover {
+	cursor: pointer;
+}
+
+.landing-text {
+	margin-top: 1vh;
+	margin-bottom: 1vh;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#landing-inside-box {
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 10px;
+}
+
+#landing-inside-box p {
+	margin-bottom: 20px;
+}
+
+.black-and-white {
+	background: black;
+	color: white;
+	font-size: 1.3em;
+	padding: 0.4em
 }
