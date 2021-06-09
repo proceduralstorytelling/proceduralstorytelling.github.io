@@ -27,15 +27,12 @@ function noiseAt(uid, nx, ny, at) {
     }
   }
   let res = `${s.noise2D(nx, ny) / 2 + 0.5}`.split("");
-  console.log(res);
   if (res && res[at]) {
     return res[at]
   } else {
     return 0;
   }
 }
-
-console.log(noise(1, 1, 500))
 
 let globalFontSize = 9;
 
@@ -99,31 +96,28 @@ function compare(v, o, nv) {
 function replaceVariable(e, localization) {
   let regex = /\$\{[\w\s\.]+\}/;
   let l = localization;
-  console.log(l);
   if (l && l.length > 0) {
     if (l.match(regex) && l.match(regex).length > 0) {
-      console.log(l.match(regex))
       let openers = l.match(/\${/g);
       let closers = l.match(/\}/g);
       if (openers.length !== closers.length) {
-        console.log(`Bracket mismatch in ${l}`)
+        console.log(`ERROR: Bracket mismatch in ${l}`)
       } else {
         while (l.includes("${")) {
-          console.log("${}")
           let matches = l.match(regex);
           if (matches) {
             let noDollars = matches[0].replace(/\${/, "").replace(/\}/, "");
-            console.log(noDollars);
             let exists = false;
             for (let n = 0; n <  e.variables.length; n++) {
               if (noDollars && e.variables[n].name === noDollars) {
+
                 l = l.replace(matches[0], e.variables[n].value)
                 exists = true;
               }
             }
             if (exists === false) {
               l = l.replace(matches[0], "")
-              console.log(`The variable ${matches[0]} did not exist for interpolation.`)
+              console.log(`ERROR: The variable ${matches[0]} did not exist for interpolation.`)
             }
           }
         }
@@ -199,7 +193,7 @@ function setVariableArray(v) {
 }
 
 function parseVariableFromText(t) {
-  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\.]+)\s([\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\.]+)/);
+  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\{\}\.]+)\s([\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\{\}\.]+)/);
   if (matches && matches.length > 0) {
     let o = {};
     o.name = matches[1];
@@ -330,9 +324,7 @@ function saveCell(g, coords) {
               let dig = matches[n].match(digits);
               if (dig) {
                 c.probability = dig[1];
-                console.log(c.probability);
                 matches[n] = matches[n].replace(/\[(\d+)\]/, "")
-                console.log(matches[n])
               }
               if (matches[n].includes("[START]")) {
                 c.start = true;
@@ -393,9 +385,7 @@ function saveCell(g, coords) {
             let dig = matches[n].match(digits);
             if (dig) {
               c.probability = dig[1];
-              console.log(c.probability);
               matches[n] = matches[n].replace(/\[(\d+)\]/, "")
-              console.log(matches[n])
             }
             if (matches[n].includes("[START]")) {
               c.start = true;
@@ -433,9 +423,7 @@ function saveCell(g, coords) {
       }
     }
     if (deleteIndex) {
-      console.log(g.currentGrid.cellArray)
       g.currentGrid.cellArray.splice(deleteIndex, 1);
-      console.log(g.currentGrid.cellArray)
     }
   }
 }
@@ -572,9 +560,6 @@ GID("gridicon").onclick = function() {
   t += "<p class=grid-buttons id=rename-grid-button>Rename Grid</p>";
   t += "<p class=grid-buttons id=delete-grid-button>Delete Grid</p>"
   for (let i = 0; i < g.grids.length; i++) {
-    console.log(g.grids);
-    console.log(g.gridIndex);
-    console.log(i)
     if (g.gridIndex === i) {
       t += `<p class="grid-list selected-grid">${g.grids[i].name}</p>`
     } else {
@@ -608,7 +593,6 @@ GID("gridicon").onclick = function() {
 let counter = 0
 
 function resetGridSelect() {
-  console.log(g);
   GID("grid-select-box").innerHTML = "";
   let t = "";
   t += "<p class=grid-buttons id=add-grid-button>Add Grid</p>";
@@ -622,7 +606,6 @@ function resetGridSelect() {
     }
 
   }
-  console.log(t);
   GID("grid-select-box").innerHTML += t;
   let els = document.getElementsByClassName("grid-list");
   for (let i = 0; i < els.length; i++) {
@@ -666,7 +649,6 @@ function runGenerationProcess(grid, w) {
     let t = generate(grid, w, true);
     if (t.includes("keep()")) {
       t = t.replace(/keep\(\)/g, "")
-      console.log(t);
     } else {
       GID("cell-box").innerHTML = "";
     }
@@ -681,7 +663,6 @@ function runGenerationProcess(grid, w) {
     let t = generate();
     if (t.includes("keep()")) {
       t = t.replace(/keep\(\)/g, "")
-      console.log(t);
     } else {
       GID("cell-box").innerHTML = "";
     }
@@ -928,7 +909,6 @@ function getComponent(possible) {
     }
     let highProb = countProb;
     if (rand >= lowProb && rand <= highProb) {
-      console.log(rand);
       return possible[i];
     }
   }
@@ -939,9 +919,7 @@ function genLoop(walker) {
   let res = ""
   let generating = true;
   while (generating === true) {
-    console.log(walker.x, walker.y);
     let currentCell = getCell(walker.x, walker.y);
-    console.log(currentCell);
     let possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
     let currentComponent = getComponent(possibleComponents)
 
@@ -1047,14 +1025,11 @@ function runFunctions(w, t) {
     t = `${t}`
     if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
-      console.log(t);
     } else if (t && t.includes("noise(")) {
       let m = t.match(/noise\(([\w\d]+)\,\s(\d+)\,\s(\d+)\)/)
-      console.log(m);
       t = t.replace(/noise\([\w\d]+\,\s\d+\,\s\d+\)/, `${noise(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]))}`)
     } else if (t && t.includes("noiseAt(")) {
       let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
-      console.log(m);
       t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
     } else if (t && t.includes("grid()")) {
       t = t.replace("grid()", `${g.currentGrid.name}`)
@@ -1091,11 +1066,9 @@ function runFunctions(w, t) {
         //lastChange is an experimental value that one could use to track the forgetting of knowledge over time. No use at moment.
         o.lastChange = 0;
         kv.push(o);
-        console.log(kv);
       }
       t = t.replace(/replaceKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
     } else if (t && t.includes("addKey(")) {
-      console.log("addkey");
       let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
@@ -1111,7 +1084,6 @@ function runFunctions(w, t) {
         o.v = m[2];
         o.lastChange = 0;
         kv.push(o);
-        console.log(kv);
       }
       t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
     } else if (t && t.includes("C(")) {
@@ -1121,7 +1093,6 @@ function runFunctions(w, t) {
       }
     } else if (t && t.includes("getRandomInt(")) {
       let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
-      console.log(m);
       if (m && m[1] && m[2])  {
         t = t.replace(/getRandomInt\((\d+)\,\s?(\d+)\)/, getRandomInt(parseInt(m[1]), parseInt(m[2])))
       } else {
@@ -1135,7 +1106,6 @@ function runFunctions(w, t) {
 }
 
 function addComponentTo(w, comp) {
-  console.log(comp);
   if (comp.variables) {
     for (let i = 0; i < comp.variables.length; i++) {
       let exists = false;
@@ -1143,7 +1113,8 @@ function addComponentTo(w, comp) {
         let wv = w.variables[j];
         wv = replaceVariable(w, wv);
         let cv = comp.variables[i];
-        cv = replaceVariable(w, cv);
+        cv.name = replaceVariable(w, cv.name);
+        cv.value = replaceVariable(w, cv.value);
         wv.name = runGrids(w, wv.name);
         cv.name = runGrids(w, cv.name)
         wv.name = runFunctions(w, wv.name);
@@ -1154,9 +1125,7 @@ function addComponentTo(w, comp) {
             wv.value = runGrids(w, wv.value);
             cv.value = runGrids(w, cv.value);
             wv.value = runFunctions(w, wv.value);
-            console.log(wv.value)
             //cv.value = runFunctions(w, cv.value);
-            console.log(cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value, w)
             w.variables[j].value = replaceVariable(w, newValue);
           }
@@ -1182,12 +1151,10 @@ function addComponentTo(w, comp) {
       let o = _.cloneDeep(comp.choices[i]);
       o.text = runGrids(w, o.text);
       o.text = runFunctions(w, o.text);
-      console.log(o);
       g.choices.push(o);
     }
   }
   if (comp.background && comp.background.length > 0) {
-    console.log("BACKGROUND")
     GID("cell-box").style.backgroundColor = `${comp.background}`
   }
   if (comp.color && comp.color.length > 0) {
@@ -1308,15 +1275,13 @@ function createPossibleCellsArr(w, component, x, y) {
 
         //check cell from direction to see if at least one component does not conflict
         let conflicts = true;
-
-        console.log(x, y);
-        console.log(dir);
-        for (let j = 0; j < dir.components.length; j++) {
-          if (variablesConflict(w, dir.components[j]) === false) {
-            conflicts = false;
+        if (dir && dir.components.length > 0) {
+          for (let j = 0; j < dir.components.length; j++) {
+            if (variablesConflict(w, dir.components[j]) === false) {
+              conflicts = false;
+            }
           }
         }
-
 
         if (dir !== undefined && conflicts === false) {
           dArr.push(dir)

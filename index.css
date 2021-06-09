@@ -255,3 +255,7 @@ a {
 	right: 0px;
 	color: black;
 }
+
+.centered {
+	text-align: center;
+}
