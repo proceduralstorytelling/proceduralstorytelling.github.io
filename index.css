@@ -263,16 +263,12 @@ a {
 	z-index: 50000;
 	width: 100vw;
 	height: 100vh;
-	background: rgba(40, 42, 54, 0.3);
-	color: #bdc3c7;
+	background: white;
 }
 
 #landing-box {
 	width: 100vw;
 	height: 100vh;
-	margin-left: auto;
-	margin-right: auto;
-	background: white;
 	border: 3px solid black;
 	box-shadow: 1px 1px 1px black;
 	color: black;
