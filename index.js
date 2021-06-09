@@ -522,30 +522,16 @@ function showHide(el) {
   }
 }
 
+GID("gogram").onclick = function() {
+  GID("landing").style.display = "none";
+}
+
 //otherwise, boxes only appear on second click...
 GID("cell-box").style.display = "none";
 GID("grid-select-box").style.display = "none";
-GID("help-box").style.display = "none";
-GID("settings-box").style.display = "none";
 
 GID("writeicon").onclick = function() {
   showHide("cell-box")
-}
-
-GID("helpicon").onclick = function() {
-  showHide("help-box");
-}
-
-GID("help-box").onclick = function() {
-  showHide("help-box");
-}
-
-GID("settings-box").onclick = function() {
-  showHide("settings-box");
-}
-
-GID("settingsicon").onclick = function() {
-  showHide("settings-box");
 }
 
 GID("cell-box").onclick = function() {

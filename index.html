@@ -10,10 +10,11 @@
 
     <div id="landing">
       <div id="landing-box">
-        <h1 class="centered black-and-white">Grammar Jammer</h1>
+        <h1 class="centered black-and-white">Gram Grid</h1>
         <div id="landing-inside-box">
-          <p>Grammar Jammer is an open source replacement grammar creation tool for context-sensitive procedural text generation. A basic video tutorial is available <a href="https://youtu.be/TZVSRK8CgwM">here</a>. If you have questions, feel free to contact me on <a href="https://twitter.com/proceduralstory">Twitter</a>, <a href="https://https://www.youtube.com/channel/UC82CE0l5S1NeCMRGjmQba9A">Youtube</a>, or the <a href="https://github.com/proceduralstorytelling/proceduralstorytelling.github.io">Github project page</a>.</p>
-          <p id="gogram">Proceed to Grammar Jammer Tool</p>
+          <p>Gram Grid is an open source replacement grammar creation tool for context-sensitive procedural text generation. A basic video tutorial is available <a href="https://youtu.be/TZVSRK8CgwM">here</a>. More advanced tutorials are forthcoming. If you have questions, feel free to contact me on <a href="https://twitter.com/proceduralstory">Twitter</a>, <a href="https://https://www.youtube.com/channel/UC82CE0l5S1NeCMRGjmQba9A">Youtube</a>, or the <a href="https://github.com/proceduralstorytelling/proceduralstorytelling.github.io">Github project page</a>. The tool is not currently mobile-friendly.</p>
+          <p id="gogram">Proceed to Gram Grid Tool</p>
+          <br><hr>
           <p><b style="font-weight: bold">June 9, 2021 Change Log:</b></p>
           <p>Variable interpolation now uses a JS-like ${name} syntax instead of the $name$ syntax described in the basic tutorial video. This allows nested variable interpolation. Example:</p>
           <code>
@@ -45,45 +46,10 @@
       <div class="tooltip"><img class="small-icon" id="generateicon" src="generate.png"></img><span class="tooltiptext">Generate</span></div>
       <div class="tooltip"><img class="small-icon" id="saveicon" src="save.png"></img><span class="tooltiptext">Save</span></div>
       <div class="tooltip"><img class="small-icon" id="loadicon" src="load.png"></img><span class="tooltiptext">Load</span></div>
-      <div class="tooltip"><img class="small-icon" id="helpicon" src="help.png"></img><span class="tooltiptext">Help</span></div>
-      <div class="tooltip"><img class="small-icon" id="settingsicon" src="settings.png"></img><span class="tooltiptext">Settings</span></div>
     </div>
 
     <div class="dark-theme" id="cell-box">
 
-    </div>
-    <div class="dark-theme" id="help-box">
-      <h1 class="main-heading">Procedural Storytelling with a Context-Sensitive Grammar</h1>
-      <div class="main-text">
-        <h2 class="small-subheading">About the Tool</h2>
-        <p>This a work-in-progress procedural text generation tool built on the concept of context-sensitive grammars. A tutorial video will be posted soon. The tool is open source, and the source is available <a href="https://github.com/proceduralstorytelling/proceduralstorytelling.github.io">here</a>.</p>
-      </div>
-      <div class="main-text">
-        <h2 class="small-subheading">Syntax</h2>
-        <ul>
-          <li>Any text not placed in brackets is added to generation output.</li><br>
-          <li>Use a bracket syntax to tell the generator what to do.</li><br>
-          <li>[START] tells the generator to start on the specified square. A grid can have an arbitrary number of starts.</li><br>
-          <li>Cardinal directions separated by commas tell the generator where it can move next, e.g., [N, NE, W] tells the generator it can go up, up and to the left, or to the left.</li><br>
-          <li>Declare a variable by using the variable followed by equals followed by a declaration. For example, [number = 7]</li><br>
-          <li>Check a variable with comparison operators such as !==, <, >, ===, etc... For example, [number === 7] will check to see whether a variable named number is set to seven before moving to a component.</li><br>
-          <li>Operate on a variable with operators such as += or -=. For example [number += 7] adds 7 to the variable named number.</li><br>
-          <li>Interpolate variables by placing the name of the variable between dollar signs. For example, $number$</li><br>
-          <li>The generator has grids, cells, and components. Select a grid to see the cells. Click on a cell to add components to the cell.</li><br>
-          <li>Add an arbitrary number of components to a cell by separating each component with "*". For example, clicking on a cell and typing "dog*cat" creates two components that could be added to the generation output: "dog" and "cat".</li><br>
-          <li>You can create other grids and run those grids as subtrees of a current grid by writing runGrid(gridName).</li>
-        </ul>
-      </div>
-      <div class="main-text">
-        <h2 class="small-subheading">About Me</h2>
-        <p>My name is John Joseph. I research procedural text generation and have a particular interest in grammars. You can connect with me on <a href="https://twitter.com/proceduralstory">Twitter</a> @proceduralstory, by e-mail at proceduralstorytelling@gmail.com, on <a href="https://www.youtube.com/channel/UC82CE0l5S1NeCMRGjmQba9A/featured">Youtube</a>, or on <a href="https://proceduralstorytelling.medium.com/">Medium</a> where I sometimes write about procedural text generation.</p>
-      </div>
-    </div>
-    <div class="dark-theme" id="settings-box">
-      <h2 class="main-heading">Settings</h1>
-      <div class="main-text">
-        <h3>Under construction - check back later!</h3>
-      </div>
     </div>
     <div class="dark-theme" id="grid-select-box">
       <p id="add-grid-button">Add Grid</p>

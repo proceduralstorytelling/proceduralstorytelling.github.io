@@ -268,9 +268,8 @@ a {
 }
 
 #landing-box {
-	width: 70vh;
-	height: 50vh;
-	margin-top: 25vh;
+	width: 100vw;
+	height: 100vh;
 	margin-left: auto;
 	margin-right: auto;
 	background: white;
@@ -278,6 +277,7 @@ a {
 	box-shadow: 1px 1px 1px black;
 	color: black;
 	overflow: scroll;
+	font-size: 3em;
 }
 
 #landing-box a {
