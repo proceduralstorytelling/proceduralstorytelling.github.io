@@ -236,6 +236,65 @@ function getChoiceFromMatch(m, coords) {
   return o
 }
 
+function process(unprocessed, coords) {
+  let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\%\/]+\]/g
+  let rx = /x([\-\d]+)/
+  let ry = /y([\-\d]+)/
+  let digits = /\[(\d+)\]/
+  let components = unprocessed.split("*")
+  let cArr = [];
+  for (let j = 0; j < components.length; j++) {
+    let c = {};
+    c.variables = [];
+    c.directions = [];
+    c.choices = [];
+    c.text = components[j].trim();
+    if (c.text.includes("teleport(")) {
+      let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
+      c.teleport = {};
+      c.teleport.gridName = m[1];
+      c.teleport.x = m[2];
+      c.teleport.y = m[3]
+      c.text = c.text.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
+      /*currentCell = getCell(walker.x, walker.y);
+      possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
+      currentComponent = getComponent(possibleComponents);*/
+    }
+    c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
+    let matches = components[j].match(total);
+    if (matches) {
+      for (let n = 0; n < matches.length; n++) {
+        let dig = matches[n].match(digits);
+        if (dig) {
+          c.probability = dig[1];
+          matches[n] = matches[n].replace(/\[(\d+)\]/, "")
+        }
+        if (matches[n].includes("[START]")) {
+          c.start = true;
+        } else if (matches[n].includes("choice:")) {
+
+          c.choices.push(getChoiceFromMatch(matches[n], coords))
+
+
+        } else if (matches[n].includes("bg:")) {
+          c.background = matches[n].replace("bg: ", "").replace("[", "").replace("]", "");
+        } else if (matches[n].includes("color:")) {
+          c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
+        } else if (matches[n].includes("img:")) {
+          c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
+        } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
+          let unprocessedVariables = normBrackets(matches[n])
+          c.variables = setVariableArray(unprocessedVariables);
+        } else {
+          c.directions = normBrackets(matches[n])
+        }
+      }
+    }
+    cArr.push(c);
+  }
+  return cArr
+}
+
 function saveCell(g, coords) {
   let rx = /x([\-\d]+)/
   let ry = /y([\-\d]+)/
@@ -287,65 +346,12 @@ function saveCell(g, coords) {
   } else if (v.length > 0) {
     let o = {};
     let exists = false;
-    let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\(\)\$\'\"\%\/]+\]/g
-    let rx = /x([\-\d]+)/
-    let ry = /y([\-\d]+)/
-    let digits = /\[(\d+)\]/
 
     for (let i = 0; i < g.currentGrid.cellArray.length; i++) {
 
-      // existing cell => edit; you could do this just as well by creating object and replacing if necessary, that would avoid duplication
-      // ALWAYS CHANGE BOTH UNTIL YOU FIX THIS AND PLACE IN ONE
       if (g.currentGrid.cellArray[i].coords === coords) {
         g.currentGrid.cellArray[i].unprocessed = v;
-        let components = g.currentGrid.cellArray[i].unprocessed.split("*")
-        let cArr = [];
-        for (let j = 0; j < components.length; j++) {
-          let c = {};
-          c.variables = [];
-          c.directions = [];
-          c.choices = [];
-          c.text = components[j].trim();
-          if (c.text.includes("teleport(")) {
-            let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
-            c.teleport = {};
-            c.teleport.gridName = m[1];
-            c.teleport.x = m[2];
-            c.teleport.y = m[3]
-            c.text = c.text.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
-            /*currentCell = getCell(walker.x, walker.y);
-            possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
-            currentComponent = getComponent(possibleComponents);*/
-          }
-          c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
-          let matches = components[j].match(total);
-          if (matches) {
-            for (let n = 0; n < matches.length; n++) {
-              let dig = matches[n].match(digits);
-              if (dig) {
-                c.probability = dig[1];
-                matches[n] = matches[n].replace(/\[(\d+)\]/, "")
-              }
-              if (matches[n].includes("[START]")) {
-                c.start = true;
-              } else if (matches[n].includes("choice:")) {
-                c.choices.push(getChoiceFromMatch(matches[n], coords))
-              } else if (matches[n].includes("bg:")) {
-                c.background = matches[n].replace("bg: ", "").replace("[", "").replace("]", "");
-              } else if (matches[n].includes("color:")) {
-                c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
-              } else if (matches[n].includes("img:")) {
-                c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
-              } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
-                let unprocessedVariables = normBrackets(matches[n])
-                c.variables = setVariableArray(unprocessedVariables);
-              } else {
-                c.directions = normBrackets(matches[n])
-              }
-            }
-          }
-          cArr.push(c);
-        }
+        let cArr = process(g.currentGrid.cellArray[i].unprocessed, coords);
         g.currentGrid.cellArray[i].components = cArr;
         exists = true;
       }
@@ -359,54 +365,7 @@ function saveCell(g, coords) {
       o.x = x;
       o.y = y;
       o.unprocessed = v;
-      let components = o.unprocessed.split("*")
-      let cArr = [];
-      for (let j = 0; j < components.length; j++) {
-        let c = {};
-        c.variables = [];
-        c.directions = [];
-        c.choices = [];
-        c.text = components[j].trim();
-        if (c.text.includes("teleport(")) {
-          let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
-          c.teleport = {};
-          c.teleport.gridName = m[1];
-          c.teleport.x = m[2];
-          c.teleport.y = m[3]
-          c.text = c.text.replace(/teleport\([\w\$\d\s\,\-\{\}]+\)/, "")
-          /*currentCell = getCell(walker.x, walker.y);
-          possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
-          currentComponent = getComponent(possibleComponents);*/
-        }
-        c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\-\\!\?,\d\.\:\(\)\$\'\"\%]+\]/g, "")
-        let matches = components[j].match(total);
-        if (matches) {
-          for (let n = 0; n < matches.length; n++) {
-            let dig = matches[n].match(digits);
-            if (dig) {
-              c.probability = dig[1];
-              matches[n] = matches[n].replace(/\[(\d+)\]/, "")
-            }
-            if (matches[n].includes("[START]")) {
-              c.start = true;
-            } else if (matches[n].includes("choice:")) {
-              c.choices.push(getChoiceFromMatch(matches[n], o.coords))
-            } else if (matches[n].includes("bg:")) {
-              c.background = matches[n].replace("bg: ", "").replace("[", "").replace("]", "");
-            } else if (matches[n].includes("color:")) {
-              c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
-            } else if (matches[n].includes("img:")) {
-              c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
-            } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
-              let unprocessedVariables = normBrackets(matches[n])
-              c.variables = setVariableArray(unprocessedVariables);
-            } else {
-              c.directions = normBrackets(matches[n])
-            }
-          }
-        }
-        cArr.push(c);
-      }
+      let cArr = process(o.unprocessed, o.coords);
       o.components = cArr
       g.currentGrid.cellArray.push(o);
     }
@@ -1132,7 +1091,7 @@ function addComponentTo(w, comp) {
       }
     }
   }
-  if (comp.choices.length > 0) {
+  if (comp.choices && comp.choices.length > 0) {
     for (let i = 0; i < comp.choices.length; i++) {
       let o = _.cloneDeep(comp.choices[i]);
       o.text = runGrids(w, o.text);
@@ -1202,7 +1161,7 @@ function variableComparisonsFail(w, compVar) {
 }
 
 function variablesConflict(w, c) {
-  if (c) {
+  if (c && c.variables) {
     for (let i = 0; i < c.variables.length; i++) {
       let compVar = c.variables[i]
       if (walkerIsEmptyButComponentCompares(w, compVar)) {
