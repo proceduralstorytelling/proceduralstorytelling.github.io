@@ -2,6 +2,8 @@
 //INCORPORATE WEIGHTING OF DIRECTIONAL MOVEMENT
 //COMPONENT PROBABILITY
 
+var markov = new Markov();
+
 let noiseArr = [];
 for (let i = 0; i < 10; i++) {
   let simp = new SimplexNoise();
@@ -976,6 +978,13 @@ function runFunctions(w, t) {
     } else if (t && t.includes("noiseAt(")) {
       let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
       t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
+    } else if(t && t.includes("markov(")) {
+      let m = t.match(/markov\(([\(\)\{\}\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\,\s(\d+)\,\s(\d+)\)/)
+      markov.addStates(m[1]);
+      markov.train(parseInt(m[2]));
+      console.log(markov);
+      let rep = markov.generateRandom(parseInt(m[3]))
+      t = t.replace(/markov\(([\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\%\/]+)\,\s(\d+)\,\s(\d+)\)/, rep)
     } else if (t && t.includes("grid()")) {
       t = t.replace("grid()", `${g.currentGrid.name}`)
     } else if (t && t.includes("coords()")) {
