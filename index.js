@@ -103,28 +103,28 @@ function replaceVariable(e, localization) {
   let l = localization;
   if (l && l.length > 0) {
     if (l.match(regex) && l.match(regex).length > 0) {
-      let openers = l.match(/\${/g);
-      let closers = l.match(/\}/g);
-      if (openers.length !== closers.length) {
-        console.log(`ERROR: Bracket mismatch in ${l}`)
-      } else {
-        while (l.includes("${")) {
-          let matches = l.match(regex);
-          if (matches) {
-            let noDollars = matches[0].replace(/\${/, "").replace(/\}/, "");
-            let exists = false;
-            for (let n = 0; n <  e.variables.length; n++) {
-              if (noDollars && e.variables[n].name === noDollars) {
+      let count = 0;
+      while (l.includes("${")) {
+        count += 1;
+        let matches = l.match(regex);
+        if (matches) {
+          let noDollars = matches[0].replace(/\${/, "").replace(/\}/, "");
+          let exists = false;
+          for (let n = 0; n <  e.variables.length; n++) {
+            if (noDollars && e.variables[n].name === noDollars) {
 
-                l = l.replace(matches[0], e.variables[n].value)
-                exists = true;
-              }
-            }
-            if (exists === false) {
-              l = l.replace(matches[0], "")
-              console.log(`ERROR: The variable ${matches[0]} did not exist for interpolation.`)
+              l = l.replace(matches[0], e.variables[n].value)
+              exists = true;
             }
           }
+          if (exists === false) {
+            l = l.replace(matches[0], "")
+            console.log(`ERROR: The variable ${matches[0]} did not exist for interpolation.`)
+          }
+        }
+        if (count === 1000) {
+          console.log(`ERROR: It appears that you have an improperly nested variable in ${localization}`);
+          return l;
         }
       }
     }
@@ -968,187 +968,11 @@ function getRandomColor() {
 
 let kv = [];
 
-function runCompromise(c, text) {
-  let doc = nlp(text);
-  console.log(c);
-  if (c.includes("numbers().get()")) {
-    return `${doc.numbers().get()}`
-  } else if (c.includes("numbers().units()")) {
-    return `${doc.numbers().units()}`
-  } else if (c.includes("numbers().fractions()")) {
-    return `${doc.numbers().fractions()}`
-  } else if (c.includes("numbers().toText()")) {
-    doc.numbers().toText()
-  } else if (c.includes("numbers().toOrdinal()")) {
-    doc.numbers().toOrdinal()
-  } else if (c.includes("numbers().toCardinal()")) {
-    doc.numbers().toCardinal()
-  } else if (c.includes("numbers().set(")) {
-    let n = c.match(/set\((\d+)\)/)
-    doc.numbers().set(n)
-  } else if (c.includes("numbers().add(")) {
-    let n = c.match(/add\((\d+)\)/)
-    doc.numbers().add(n)
-  } else if (c.includes("numbers().subtract(")) {
-    let n = c.match(/subtract\((\d+)\)/)
-    doc.numbers().subtract(n)
-  } else if (c.includes("numbers().increment()")) {
-    doc.numbers().increment()
-  } else if (c.includes("numbers().decrement()")) {
-    return `${doc.numbers().decrement()}`
-  } else if (c.includes("numbers().isEqual(")) {
-    let n = c.match(/isEqual\((\d+)\)/)
-    return `${doc.numbers().isEqual(n)}`
-  } else if (c.includes("numbers().isOrdinal()")) {
-    return `${doc.numbers().isOrdinal()}`
-  } else if (c.includes("numbers().isCardinal()")) {
-    return `${doc.numbers().isOrdinal()}`
-  } else if (c.includes("numbers().toLocaleString()")) {
-    doc.numbers().toLocaleString()
-  } else if (c.includes("has(")) {
-    let m = c.match(/has\(([\w\s\#\(\)]+)\)/);
-    if (m.length >= 2) {
-      return `${doc.has(`${m[1]}`)}`
-    }
-  } else if (c.includes("wordCount()")) {
-    return `${doc.wordCount()}`
-  } else if (c.includes("length()")) {
-    return `${doc.length()}`
-  } else if (c.includes("toLowerCase()")) {
-    doc.toLowerCase();
-  } else if (c.includes("toUpperCase()")) {
-    doc.toUpperCase()
-  } else if (c.includes("toTitleCase()")) {
-    doc.toTitleCase()
-  } else if (c.includes("toCamelCase()")) {
-    return `${doc.toCamelCase().text()}`
-  } else if (c.includes("adverbs()")) {
-    return `${doc.adverbs().text()}`
-  } else if (c.includes("conjunctions()")) {
-    return `${doc.conjunctions().text()}`
-  } else if (c.includes("prepositions()")) {
-    return `${doc.prepositions().text()}`
-  } else if (c.includes("abbreviations()")) {
-    return `${doc.abbreviations().text()}`
-  } else if (c.includes("possessives()")) {
-    return `${doc.possessives().text()}`
-  } else if (c.includes("prepositions()")) {
-    return `${doc.quotations().text()}`
-  } else if (c.includes("acronyms()")) {
-    return `${doc.acronyms().text()}`
-  } else if (c.includes("normalize()")) {
-    return doc.normalize({
-      whitespace: true
-    }).out();
-  } else if (c.includes("contractions()")) {
-    return `${doc.contractions().text()}`
-  } else if (c.includes("contractions().expand()")) {
-    doc.contractions().expand()
-  } else if (c.includes("contract()")) {
-    doc.contract()
-  } else if (c.includes("parentheses")) {
-    return `${doc.parentheses().text()}`
-  } else if (c.includes("quotations")) {
-    return `${doc.quotations().text()}`
-  } else if (c.includes("verbs().toPastTense()")) {
-    doc.verbs().toPastTense()
-  } else if (c.includes("verbs().toPresentTense()")) {
-    doc.verbs().toPresentTense()
-  } else if (c.includes("verbs().toFutureTense()")) {
-    doc.verbs().toFutureTense()
-  } else if (c.includes("verbs().toInfinitive()")) {
-    doc.verbs().toInfinitive()
-  } else if (c.includes("verbs().toGerund()")) {
-    doc.verbs().toGerund()
-  } else if (c.includes("verbs().toParticiple()")) {
-    doc.verbs().toParticiple()
-  } else if (c.includes("verbs().toNegative()")) {
-    doc.verbs().toNegative().text()
-  } else if (c.includes("verbs().toPositive()")) {
-    doc.verbs().toPositive()
-  } else if (c.includes("verbs().isPlural()")) {
-    doc.verbs().isPlural()
-  } else if (c.includes("verbs().isSingular()")) {
-    doc.verbs().isSingular()
-  } else if (c.includes("verbs().adverbs()")) {
-    doc.verbs().adverbs()
-  } else if (c.includes("verbs().isImperative")) {
-    doc.verbs().isImperative()
-  } else if (c.includes("verbs()")) {
-    return `${doc.verbs().text()}`
-  } else if (c.includes("nouns().adjectives()")) {
-    return `${doc.nouns().adjectives().text()}`
-  } else if (c.includes("nouns().toPlural()")) {
-    doc.nouns().toPlural()
-  } else if (c.includes("nouns().isPlural()")) {
-    return `${doc.nouns().isPlural().text()}`
-  } else if (c.includes("nouns().toSingular()")) {
-    doc.nouns().toSingular()
-  } else if (c.includes("nouns().isSingular()")) {
-    return `${doc.nouns().isSingular().text()}`
-  } else if (c.includes("nouns().hasPlural()")) {
-    return `${doc.nouns().hasPlural().text()}`
-  } else if (c.includes("nouns().toPossessive()")) {
-    doc.nouns().toPossessive()
-  } else if (c.includes("pronouns()")) {
-    return `${doc.pronouns().text()}`
-  } else if(c.includes("nouns()")) {
-    return `${doc.nouns().text()}`
-  } else if (c.includes("sentences().toNegative()")) {
-    doc.sentences().toNegative()
-  } else if (c.includes("sentences().subjects()")) {
-    doc.sentences().subjects()
-  } else if (c.includes("sentences().toPastTense()")) {
-    doc.sentences().toPastTense()
-  } else if (c.includes("sentences().toPresentTense()")) {
-    doc.sentences().toPresentTense()
-  } else if (c.includes("sentences().toFutureTense()")) {
-    doc.sentences().toFutureTense()
-  } else if (c.includes("sentences().toPositive()")) {
-    doc.sentences().toPositive()
-  } else if (c.includes("sentences().isPassive()")) {
-    doc.sentences().isPassive()
-  } else if (c.includes("sentences().isQuestion()")) {
-    doc.sentences().isQuestion()
-  } else if (c.includes("sentences().isExclamation()")) {
-    doc.sentences().isExclamation()
-  } else if (c.includes("sentences().isStatement()")) {
-    doc.sentences().isStatement()
-  } else if (c.includes("sentences().prepend()")) {
-    doc.sentences().prepend()
-  } else if (c.includes("sentences().append()")) {
-    doc.sentences().append()
-  } else if (c.includes("sentences().toExclamation()")) {
-    doc.sentences().toExclamation()
-  } else if (c.includes("sentences().toQuestion()")) {
-    doc.sentences().toQuestion()
-  } else if (c.includes("sentences().toStatement()")) {
-    doc.sentences().toStatement()
-  } else if (c.includes("sentences()")) {
-    return `${doc.sentences().text()}`
-  } else if (c.includes("topics()")) {
-    return `${doc.topics().text()}`
-  } else if(c.includes("adjectives().toSuperlative()")) {
-    doc.adjectives().toSuperlative()
-  } else if(c.includes("adjectives().toComparative()")) {
-    doc.adjectives().toComparative()
-  } else if(c.includes("adjectives().toAdverb()")) {
-    doc.adjectives().toAdverb()
-  } else if(c.includes("adjectives().toVerb()")) {
-    doc.adjectives().toVerb()
-  } else if(c.includes("adjectives().toNoun()")) {
-    doc.adjectives().toNoun()
-  } else if(c.includes("adjectives()")) {
-    return `${doc.adjectives().text()}`
-  }
-  return doc.text();
-  return "";
-}
-
 function runFunctions(w, t) {
   let stillT = true;
   while (stillT === true) {
     t = `${t}`
+    replaceVariable(w, t);
     if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
     } else if (t && t.includes("noise(")) {
@@ -1157,17 +981,17 @@ function runFunctions(w, t) {
     } else if (t && t.includes("noiseAt(")) {
       let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
       t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
-    } else if (t && t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/)) {
+    } else if (t && t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/)) {
       //compromise
-      let m = t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/);
+      let m = t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/);
       let res;
       console.log(m[1]);
       console.log(m[2])
       res = runCompromise(m[2], m[1]);
       if (res) {
-        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, res)
+        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, res)
       } else {
-        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, "")
+        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, "")
       }
 
     } else if(t && t.includes("markov(")) {
