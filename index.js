@@ -217,7 +217,7 @@ function getChoiceFromMatch(m, coords) {
   let ry = /y([\-\d]+)/
   o.x = parseInt(coords.match(rx)[1]);
   o.y = parseInt(coords.match(ry)[1]);
-  let parens = /\([\w\s\d\,\!\/\'\"\$\.\=\+\-\>\<\%]+\)/g;
+  let parens = /\([\w\s\d\,\!\/\'\"\”\“\$\.\=\+\-\>\<\%]+\)/g;
   let  parensArr = m.match(parens) || [];
   //o.text = m.replace(parens, "");
   o.text = m;
@@ -243,7 +243,7 @@ function getChoiceFromMatch(m, coords) {
 }
 
 function process(unprocessed, coords) {
-  let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\%\/]+\]/g
+  let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\”\“\”\“\%\/]+\]/g
   let rx = /x([\-\d]+)/
   let ry = /y([\-\d]+)/
   let digits = /\[(\d+)\]/
@@ -266,7 +266,7 @@ function process(unprocessed, coords) {
       possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
       currentComponent = getComponent(possibleComponents);*/
     }
-    c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\%\/]+\]/g, "")
+    c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\”\“\%\/]+\]/g, "")
     let matches = components[j].match(total);
     if (matches) {
       for (let n = 0; n < matches.length; n++) {
@@ -629,7 +629,7 @@ function runGenerationProcess(grid, w) {
 
   GID("cell-box").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
-    let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<\/\"\']+\)/g;
+    let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<\/\"\”\“\']+\)/g;
     //WORKING HERE
     let num = n;
     let t = g.choices[n].text.replace(parens, "")
@@ -993,17 +993,17 @@ function runFunctions(w, t) {
     t = `${t}`
     replaceVariable(w, t);
     if (t && t.includes("speak{")) {
-      let m = t.match(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/]+)\}/);
-      let f = t.match(/speak\{[\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/]+\}\.([\.\w\(\)\d]+)/);
+      let m = t.match(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/);
+      let f = t.match(/speak\{[\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+\}\.([\.\w\(\)\d]+)/);
       let o = {};
-      o.text = m[1]
+      o.text = `${m[1]}`
       if (f && f.length > 0) {
         o.functions = f[1].split(".")
       } else {
         o.functions = [];
       }
       g.speak.push(o)
-      t = t.replace(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/\\]+)\}/, "")
+      t = t.replace(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/\\]+)\}/, "")
     } else if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
     } else if (t && t.includes("noise(")) {
@@ -1012,26 +1012,26 @@ function runFunctions(w, t) {
     } else if (t && t.includes("noiseAt(")) {
       let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
       t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
-    } else if (t && t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\`\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/)) {
+    } else if (t && t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\`\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/)) {
       //compromise
-      let m = t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/);
+      let m = t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/);
       let res;
       console.log(m[1]);
       console.log(m[2])
       res = runCompromise(m[2], m[1]);
       if (res) {
-        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, res)
+        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, res)
       } else {
-        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, "")
+        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, "")
       }
 
     } else if(t && t.includes("markov(")) {
-      let m = t.match(/markov\(([\(\)\{\}\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\%\/$]+)\,\s(\d+)\,\s(\d+)\)/)
+      let m = t.match(/markov\(([\(\)\{\}\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\”\“\%\/$]+)\,\s(\d+)\,\s(\d+)\)/)
       markov.addStates(m[1]);
       markov.train(parseInt(m[2]));
       console.log(markov);
       let rep = markov.generateRandom(parseInt(m[3]))
-      t = t.replace(/markov\(([\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\%\/]+)\,\s(\d+)\,\s(\d+)\)/, rep)
+      t = t.replace(/markov\(([\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\”\“\%\/]+)\,\s(\d+)\,\s(\d+)\)/, rep)
     } else if (t && t.includes("grid()")) {
       t = t.replace("grid()", `${g.currentGrid.name}`)
     } else if (t && t.includes("coords()")) {
@@ -1051,7 +1051,7 @@ function runFunctions(w, t) {
         t = t.replace(/indent\(\d+\)/, indent)
       }
     } else if (t && t.includes("replaceKey(")) {
-      let m = t.match(/replaceKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
+      let m = t.match(/replaceKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
         if (kv[i].k === m[1]) {
@@ -1068,9 +1068,9 @@ function runFunctions(w, t) {
         o.lastChange = 0;
         kv.push(o);
       }
-      t = t.replace(/replaceKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
+      t = t.replace(/replaceKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\”\“\/\\]+)\)/, "")
     } else if (t && t.includes("addKey(")) {
-      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\/\\]+)\)/)
+      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
         if (kv[i].k === m[1]) {
@@ -1086,7 +1086,7 @@ function runFunctions(w, t) {
         o.lastChange = 0;
         kv.push(o);
       }
-      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\/\\]+)\)/, "")
+      t = t.replace(/addKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\”\“\/\\]+)\)/, "")
     } else if (t && t.includes("C(")) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {

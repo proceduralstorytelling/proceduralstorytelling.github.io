@@ -1759,7 +1759,6 @@ function middleEnglish(t) {
   t = t.replace(/\svisible\s/g, ` Ysene `)
   t = t.replace(/\sboiled\s/g, ` Ysode `)
   t = t.replace(/\sevil\s/g, ` Yuel `)
-  t = t.replace(/\ssubj\s/g, ` Ywyte `)
   t = t.replace(/\saccustomed\s/g, ` Ywon `)
   t = t.replace(/\saccustomed\s/g, ` Ywoned `)
   return t.toLowerCase();
