@@ -140,6 +140,7 @@ function getRandomInt(min, max) {
 let g = {};
 g.output = "";
 g.choices = [];
+g.speak = [];
 
 function createGrid(n) {
   let grid = {};
@@ -655,8 +656,26 @@ function runGenerationProcess(grid, w) {
       }
     }
   }
+  textToSpeech(g);
   g.oldChoices = g.choices;
   g.choices = [];
+}
+
+function textToSpeech(g) {
+  let synth = window.speechSynthesis;
+  for (let n = 0; n < g.speak.length; n++) {
+    let o = g.speak[n];
+    if (g.speak[n].functions.length > 0) {
+      for (let i = 0; i < g.speak[n].functions.length; i++) {
+        //process functions
+      }
+    }
+    console.log(g.speak);
+    let text = `${g.speak[n].text}`
+    let utterance = new SpeechSynthesisUtterance(text);
+    synth.speak(utterance);
+  }
+  g.speak = [];
 }
 
 GID("generateicon").onclick = function() {
@@ -973,7 +992,19 @@ function runFunctions(w, t) {
   while (stillT === true) {
     t = `${t}`
     replaceVariable(w, t);
-    if (t && t.includes("getRandomColor()")) {
+    if (t && t.includes("speak{")) {
+      let m = t.match(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/]+)\}/);
+      let f = t.match(/speak\{[\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/]+\}\.([\.\w\(\)\d]+)/);
+      let o = {};
+      o.text = m[1]
+      if (f && f.length > 0) {
+        o.functions = f[1].split(".")
+      } else {
+        o.functions = [];
+      }
+      g.speak.push(o)
+      t = t.replace(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\%\/)\<\>\=\/\\]+)\}/, "")
+    } else if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
     } else if (t && t.includes("noise(")) {
       let m = t.match(/noise\(([\w\d]+)\,\s(\d+)\,\s(\d+)\)/)
@@ -981,17 +1012,17 @@ function runFunctions(w, t) {
     } else if (t && t.includes("noiseAt(")) {
       let m = t.match(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/)
       t = t.replace(/noiseAt\(([\w\d]+)\,\s(\d+)\,\s(\d+)\,\s(\d+)\)/, `${noiseAt(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]), parseInt(m[4]))}`)
-    } else if (t && t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/)) {
+    } else if (t && t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\`\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/)) {
       //compromise
-      let m = t.match(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/);
+      let m = t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/);
       let res;
       console.log(m[1]);
       console.log(m[2])
       res = runCompromise(m[2], m[1]);
       if (res) {
-        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, res)
+        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, res)
       } else {
-        t = t.replace(/\{([\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$]+)\}\.([\w\#\(\)\s\.]+)/, "")
+        t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, "")
       }
 
     } else if(t && t.includes("markov(")) {

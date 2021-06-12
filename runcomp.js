@@ -159,7 +159,9 @@ function runCompromise(c, text) {
     "toExclamation",
     "toQuestion",
     "toStatement",
-    "each"
+    "each",
+    "speak",
+    "middleEnglish"
   ]
   nlpWrap.doc = nlp(text);
   console.log(c);
@@ -169,36 +171,48 @@ function runCompromise(c, text) {
   nlpWrap.o = {};
   for (let i = 0; i < c.length; i++) {
     let f = c[i].match(/(\w+)\(/)[1]
-    let onList = false;
-    for (let i = 0; i < compSafe.length; i++) {
-      if (f === compSafe[i]) {
-        console.log(`${f} is the same as ${compSafe[i]}`)
-        onList = true;
+    if (f === "middleEnglish") {
+      return middleEnglish(nlpWrap.o)
+    } else if (f === "speak") {
+      let o = {
+        text: nlpWrap.o,
+        functions: [],
       }
-    }
-    let args;
-    if (onList === true) {
-      if (c[i].match(/\(([\w\d\,]+)\)/)) {
-        args = c[i].match(/\(([[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\$\'\"\%\/]+)\)/)[1]
-      } else {
-        args = null;
-      }
-      if (nlpWrap.o[f]) {
-        try {
-          nlpWrap.o = nlpWrap.o[f](args)
-        } catch {
-          console.log(`When you tried to use a compromise method named ${f} with the arguments ${args}, it threw an error. Make sure that the method ${f} exists for the given context`)
-        }
-      } else {
-        console.log(f);
-        try {
-          nlpWrap.o = nlpWrap.doc[f](args)
-        } catch {
-          console.log(`When you tried to use a compromise method named ${f} with the arguments ${args}, it threw an error. Make sure that the method ${f} exists for the given context`)
-        }
-      }
+
+      g.speak.push(o)
+      console.log(g);
     } else {
-      console.log(`${f} is not a compromise method.`)
+      let onList = false;
+      for (let i = 0; i < compSafe.length; i++) {
+        if (f === compSafe[i]) {
+          console.log(`${f} is the same as ${compSafe[i]}`)
+          onList = true;
+        }
+      }
+      let args;
+      if (onList === true) {
+        if (c[i].match(/\(([\w\d\,]+)\)/)) {
+          args = c[i].match(/\(([[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\$\'\"\%\/]+)\)/)[1]
+        } else {
+          args = null;
+        }
+        if (nlpWrap.o[f]) {
+          try {
+            nlpWrap.o = nlpWrap.o[f](args)
+          } catch {
+            console.log(`When you tried to use a compromise method named ${f} with the arguments ${args}, it threw an error. Make sure that the method ${f} exists for the given context`)
+          }
+        } else {
+          console.log(f);
+          try {
+            nlpWrap.o = nlpWrap.doc[f](args)
+          } catch {
+            console.log(`When you tried to use a compromise method named ${f} with the arguments ${args}, it threw an error. Make sure that the method ${f} exists for the given context`)
+          }
+        }
+      } else {
+        console.log(`${f} is not a compromise method.`)
+      }
     }
   }
   return nlpWrap.o
