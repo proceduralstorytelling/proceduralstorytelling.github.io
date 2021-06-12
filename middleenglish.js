@@ -302,7 +302,7 @@ function middleEnglish(t) {
   t = t.replace(/\scompany\s/g, ` Compayni `)
   t = t.replace(/\scompiled\s/g, ` Compilet `)
   t = t.replace(/\srepentance\s/g, ` Compunccion `)
-  t = t.replace(/\sthe\s/g, ` Comyns `)
+  t = t.replace(/\sthe\s/g, ` þe `)
   t = t.replace(/\sconscience\s/g, ` Conscience `)
   t = t.replace(/\snature\s/g, ` Condicioun `)
   t = t.replace(/\sallied\s/g, ` Confederat `)
@@ -1762,5 +1762,5 @@ function middleEnglish(t) {
   t = t.replace(/\ssubj\s/g, ` Ywyte `)
   t = t.replace(/\saccustomed\s/g, ` Ywon `)
   t = t.replace(/\saccustomed\s/g, ` Ywoned `)
-  return t;
+  return t.toLowerCase();
 }
