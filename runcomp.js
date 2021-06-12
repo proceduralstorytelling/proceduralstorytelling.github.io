@@ -161,7 +161,8 @@ function runCompromise(c, text) {
     "toStatement",
     "each",
     "speak",
-    "middleEnglish"
+    "middleEnglish",
+    "rhyme"
   ]
   nlpWrap.doc = nlp(text);
   console.log(c);
@@ -171,7 +172,10 @@ function runCompromise(c, text) {
   nlpWrap.o = {};
   for (let i = 0; i < c.length; i++) {
     let f = c[i].match(/(\w+)\(/)[1]
-    if (f === "middleEnglish") {
+    if (f === "rhyme") {
+      let rhymes = pronouncing.rhymes(nlpWrap.o);
+      return rhymes[getRandomInt(0, rhymes.length - 1)]
+    } else if (f === "middleEnglish") {
       return middleEnglish(nlpWrap.o)
     } else if (f === "speak") {
       let o = {
