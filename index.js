@@ -680,11 +680,6 @@ function textToSpeech(g) {
       utterance.rate = voice.rate;
       utterance.pitch = voice.pitch;
     }
-    if (synth.pending === true) {
-      let utterance = new SpeechSynthesisUtterance("Hey, don't interrupt me!");
-      synth.cancel()
-      synth.speak(utterance);
-    }
     synth.speak(utterance);
   }
   g.speak = [];
@@ -1012,12 +1007,29 @@ function runFunctions(w, t) {
       } else {
         stillT = false;
       }
-    } else if (t && t.includes("speaker{")) {
-      let m = t.match(/speaker\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/)
+    } else if (t && t.includes("<rhyme>")) {
+      let m = t.match(/\<rhyme\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/rhyme\>/)
+      let res = m[1]
+      res = res.split(" ");
+      let rhyme = res[res.length - 1];
+      rhyme = pronouncing.rhymes(rhyme);
+      console.log(rhyme)
+      if (rhyme && rhyme.length > 0) {
+        let pickRhyme = rhyme[getRandomInt(0, rhyme.length - 1)]
+        res[res.length - 1] = `${pickRhyme} `;
+        res = res.join(" ");
+
+      } else {
+        console.log(`ERROR: No rhyme for ${t}`)
+        return "";
+      }
+      t = t.replace(/\<rhyme\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/rhyme\>/, res)
+    } else if (t && t.includes("<speaker>")) {
+      let m = t.match(/\<speaker\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/speaker\>/)
+      console.log(m);
       try {
         let o = {};
         o.name = m[1].match(/name\:\s(\w+)/)[1]
-        //o.gender = m[1].match(/gender\:\s(\w+)/)[1];
         o.lang = m[1].match(/lang\:\s(\w+)/)[1];
         o.pitch = m[1].match(/pitch:\s(\d\.\d)/)[1];
         o.rate = m[1].match(/rate:\s(\d\.\d)/)[1];
@@ -1045,19 +1057,7 @@ function runFunctions(w, t) {
       } catch {
         console.log(`ERROR: something went wrong when setting speaker with ${m[0]}`)
       }
-      t = t.replace(/speaker\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/, "")
-    } else if (t && t.includes("speak{")) {
-      let m = t.match(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/);
-      let f = t.match(/speak\{[\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+\}\.([\.\w\(\)\d]+)/);
-      let o = {};
-      o.text = `${m[1]}`
-      if (f && f.length > 0) {
-        o.functions = f[1].split(".")
-      } else {
-        o.functions = [];
-      }
-      g.speak.push(o)
-      t = t.replace(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/\\]+)\}/, "")
+      t = t.replace(/\<speaker\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\<\/speaker\>/, "")
     } else if (t && t.includes("getRandomColor()")) {
       t = t.replace("getRandomColor()", getRandomColor());
     } else if (t && t.includes("noise(")) {
@@ -1146,6 +1146,14 @@ function runFunctions(w, t) {
       if (m && m[1]) {
         t = t.replace(/C\((\w+)\)/, m[1].toUpperCase())
       }
+    } else if (t && t.includes("speak")) {
+      let m = t.match(/\<speak\((\w+)\)\>([\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+)\<\/speak>/);
+      let f = t.match(/\<speak\((\w+)\)\>[\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+\<\/speak\>/);
+      let o = {};
+      o.text = `${m[2]}`
+      o.voice = `${m[1]}`
+      g.speak.push(o)
+      t = t.replace(/\<speak\((\w+)\)\>([\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/\\]+)<\/speak\>/, "")
     } else {
       stillT = false;
     }

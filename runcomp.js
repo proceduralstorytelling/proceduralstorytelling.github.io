@@ -180,7 +180,21 @@ function runCompromise(c, text) {
     }
     if (f === "rhyme") {
       let rhymes = pronouncing.rhymes(nlpWrap.o);
-      nlp.altOutput = rhymes[getRandomInt(0, rhymes.length - 1)]
+      let t = nlpWrap.o;
+      t = t.split(" ");
+      let rhyme = t[t.length - 1];
+      rhyme = pronouncing.rhymes(rhyme);
+      if (rhyme && rhyme.length > 0) {
+        rhyme = rhyme[getRandomInt(0, rhyme.length - 1)]
+        t[t.length - 1] = `${rhyme} `;
+        t = t.join(" ");
+        nlp.altOutput = t
+      } else {
+        console.log("ERROR: No rhyme for t")
+        return "";
+      }
+
+      // OPTIMIZE: rhymes[getRandomInt(0, rhymes.length - 1)]
     } else if (f === "middleEnglish") {
       nlp.altOutput = middleEnglish(nlpWrap.o)
     } else if (f === "speak") {
