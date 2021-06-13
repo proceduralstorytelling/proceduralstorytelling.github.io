@@ -1146,7 +1146,7 @@ function runFunctions(w, t) {
       if (m && m[1]) {
         t = t.replace(/C\((\w+)\)/, m[1].toUpperCase())
       }
-    } else if (t && t.includes("speak")) {
+    } else if (t && t.includes("<speak>")) {
       let m = t.match(/\<speak\((\w+)\)\>([\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+)\<\/speak>/);
       let f = t.match(/\<speak\((\w+)\)\>[\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+\<\/speak\>/);
       let o = {};
