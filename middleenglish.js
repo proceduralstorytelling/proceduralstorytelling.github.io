@@ -1,4 +1,5 @@
 function middleEnglish(t) {
+  console.log(t);
   t = t.replace(/\sI\s/, " Ich ")
   t = t.replace(/\sour\s/, " oure ");
   t = t.replace(/\syou\s/, " thee ");
@@ -1665,8 +1666,6 @@ function middleEnglish(t) {
   t = t.replace(/\sinterrog\s/g, ` Hwar `)
   t = t.replace(/\swhelp\s/g, ` Whelp `)
   t = t.replace(/\swheat\s/g, ` Whete `)
-  t = t.replace(/\sinterrog\s/g, ` Hwi `)
-  t = t.replace(/\sadj\s/g, ` Wiche `)
   t = t.replace(/\swhite\s/g, ` Whyyt `)
   t = t.replace(/\stime\s/g, ` Wyle `)
   t = t.replace(/\sfor\s/g, ` Whyle `)

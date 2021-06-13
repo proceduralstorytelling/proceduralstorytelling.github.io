@@ -172,16 +172,27 @@ function runCompromise(c, text) {
   nlpWrap.o = {};
   for (let i = 0; i < c.length; i++) {
     let f = c[i].match(/(\w+)\(/)[1]
+    let args;
+    if (c[i].match(/\(([\w\d\,]+)\)/)) {
+      args = c[i].match(/\(([\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\$\'\"\%\/]+)\)/)[1]
+    } else {
+      args = null;
+    }
     if (f === "rhyme") {
       let rhymes = pronouncing.rhymes(nlpWrap.o);
-      return rhymes[getRandomInt(0, rhymes.length - 1)]
+      nlp.altOutput = rhymes[getRandomInt(0, rhymes.length - 1)]
     } else if (f === "middleEnglish") {
-      return middleEnglish(nlpWrap.o)
+      nlp.altOutput = middleEnglish(nlpWrap.o)
     } else if (f === "speak") {
-      let o = {
-        text: nlpWrap.o,
-        functions: [],
+
+      let o = {}
+      o.voice = args;
+      if (nlp.altOutput) {
+        o.text = nlp.altOutput;
+      } else {
+        o.text = nlpWrap.o
       }
+
 
       g.speak.push(o)
       console.log(g);
@@ -193,13 +204,8 @@ function runCompromise(c, text) {
           onList = true;
         }
       }
-      let args;
+
       if (onList === true) {
-        if (c[i].match(/\(([\w\d\,]+)\)/)) {
-          args = c[i].match(/\(([[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\$\'\"\%\/]+)\)/)[1]
-        } else {
-          args = null;
-        }
         if (nlpWrap.o[f]) {
           try {
             nlpWrap.o = nlpWrap.o[f](args)
@@ -219,5 +225,10 @@ function runCompromise(c, text) {
       }
     }
   }
-  return nlpWrap.o
+  if (nlp.altOutput) {
+    console.log(nlp.altOutput)
+    return nlp.altOutput;
+  } else {
+    return nlpWrap.o
+  }
 }

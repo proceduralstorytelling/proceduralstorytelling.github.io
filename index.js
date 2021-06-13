@@ -141,6 +141,7 @@ let g = {};
 g.output = "";
 g.choices = [];
 g.speak = [];
+g.speakers = [];
 
 function createGrid(n) {
   let grid = {};
@@ -665,14 +666,25 @@ function textToSpeech(g) {
   let synth = window.speechSynthesis;
   for (let n = 0; n < g.speak.length; n++) {
     let o = g.speak[n];
-    if (g.speak[n].functions.length > 0) {
-      for (let i = 0; i < g.speak[n].functions.length; i++) {
-        //process functions
-      }
-    }
     console.log(g.speak);
     let text = `${g.speak[n].text}`
+    let voice;
+    for (let i = 0; i < g.speakers.length; i++) {
+      if (g.speakers[i].name === o.voice) {
+        voice = g.speakers[i]
+      }
+    }
     let utterance = new SpeechSynthesisUtterance(text);
+    if (voice) {
+      utterance.voice = voice.voice
+      utterance.rate = voice.rate;
+      utterance.pitch = voice.pitch;
+    }
+    if (synth.pending === true) {
+      let utterance = new SpeechSynthesisUtterance("Hey, don't interrupt me!");
+      synth.cancel()
+      synth.speak(utterance);
+    }
     synth.speak(utterance);
   }
   g.speak = [];
@@ -987,12 +999,54 @@ function getRandomColor() {
 
 let kv = [];
 
+
 function runFunctions(w, t) {
   let stillT = true;
   while (stillT === true) {
     t = `${t}`
     replaceVariable(w, t);
-    if (t && t.includes("speak{")) {
+    if (t && t.includes("getRandomInt(")) {
+      let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
+      if (m && m[1] && m[2])  {
+        t = t.replace(/getRandomInt\((\d+)\,\s?(\d+)\)/, getRandomInt(parseInt(m[1]), parseInt(m[2])))
+      } else {
+        stillT = false;
+      }
+    } else if (t && t.includes("speaker{")) {
+      let m = t.match(/speaker\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/)
+      try {
+        let o = {};
+        o.name = m[1].match(/name\:\s(\w+)/)[1]
+        //o.gender = m[1].match(/gender\:\s(\w+)/)[1];
+        o.lang = m[1].match(/lang\:\s(\w+)/)[1];
+        o.pitch = m[1].match(/pitch:\s(\d\.\d)/)[1];
+        o.rate = m[1].match(/rate:\s(\d\.\d)/)[1];
+        console.log(o);
+        if (o.pitch > 2.0) {
+          o.pitch = `2.0`;
+        }
+        if (o.rate > 10) {
+          o.rate = `10`;
+        }
+        if (o.rate < 0.1) {
+          o.rate = `0.1`
+        }
+        let synth = window.speechSynthesis;
+        let voices = synth.getVoices();
+        let voiceMatches = [];
+        for (let i = 0; i < voices.length; i++) {
+          if (voices[i].lang.includes(`${o.lang}`)) {
+            voiceMatches.push(voices[i])
+          }
+        }
+        let rand = getRandomInt(0, voiceMatches.length - 1);
+        o.voice = voiceMatches[rand];
+        g.speakers.push(o)
+      } catch {
+        console.log(`ERROR: something went wrong when setting speaker with ${m[0]}`)
+      }
+      t = t.replace(/speaker\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/, "")
+    } else if (t && t.includes("speak{")) {
       let m = t.match(/speak\{([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+)\}/);
       let f = t.match(/speak\{[\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\<\>\=\/]+\}\.([\.\w\(\)\d]+)/);
       let o = {};
@@ -1091,13 +1145,6 @@ function runFunctions(w, t) {
       let m = t.match(/C\((\w+)\)/)
       if (m && m[1]) {
         t = t.replace(/C\((\w+)\)/, m[1].toUpperCase())
-      }
-    } else if (t && t.includes("getRandomInt(")) {
-      let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
-      if (m && m[1] && m[2])  {
-        t = t.replace(/getRandomInt\((\d+)\,\s?(\d+)\)/, getRandomInt(parseInt(m[1]), parseInt(m[2])))
-      } else {
-        stillT = false;
       }
     } else {
       stillT = false;
