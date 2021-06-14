@@ -666,7 +666,6 @@ function textToSpeech(g) {
   let synth = window.speechSynthesis;
   for (let n = 0; n < g.speak.length; n++) {
     let o = g.speak[n];
-    console.log(g.speak);
     let text = `${g.speak[n].text}`
     let voice;
     for (let i = 0; i < g.speakers.length; i++) {
@@ -1011,9 +1010,8 @@ function runFunctions(w, t) {
       let m = t.match(/\<rhyme\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/rhyme\>/)
       let res = m[1]
       res = res.split(" ");
-      let rhyme = res[res.length - 1];
+      let rhyme = res[res.length - 1].toLowerCase();
       rhyme = pronouncing.rhymes(rhyme);
-      console.log(rhyme)
       if (rhyme && rhyme.length > 0) {
         let pickRhyme = rhyme[getRandomInt(0, rhyme.length - 1)]
         res[res.length - 1] = `${pickRhyme} `;
@@ -1026,14 +1024,12 @@ function runFunctions(w, t) {
       t = t.replace(/\<rhyme\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/rhyme\>/, res)
     } else if (t && t.includes("<speaker>")) {
       let m = t.match(/\<speaker\>([\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\/)\=\/]+)\<\/speaker\>/)
-      console.log(m);
       try {
         let o = {};
         o.name = m[1].match(/name\:\s(\w+)/)[1]
         o.lang = m[1].match(/lang\:\s(\w+)/)[1];
         o.pitch = m[1].match(/pitch:\s(\d\.\d)/)[1];
         o.rate = m[1].match(/rate:\s(\d\.\d)/)[1];
-        console.log(o);
         if (o.pitch > 2.0) {
           o.pitch = `2.0`;
         }
@@ -1146,7 +1142,7 @@ function runFunctions(w, t) {
       if (m && m[1]) {
         t = t.replace(/C\((\w+)\)/, m[1].toUpperCase())
       }
-    } else if (t && t.includes("<speak>")) {
+    } else if (t && t.match(/\<speak\((\w+)\)\>/)) {
       let m = t.match(/\<speak\((\w+)\)\>([\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+)\<\/speak>/);
       let f = t.match(/\<speak\((\w+)\)\>[\$\{\}\w\s\.\-\!\?\d\,\:\;\'\"\”\“\%\(/)\<\>\=\/]+\<\/speak\>/);
       let o = {};
