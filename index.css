@@ -315,3 +315,19 @@ a {
 	font-size: 1.3em;
 	padding: 0.4em
 }
+
+#outputText {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 2;
+	color: black;
+}
+
+#outputCanvas {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	background: white;
+	z-index: 1;
+}

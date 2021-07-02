@@ -498,6 +498,9 @@ GID("grid-select-box").style.display = "none";
 
 GID("writeicon").onclick = function() {
   showHide("cell-box")
+  let c = document.getElementById("outputCanvas");
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
 }
 
 GID("cell-box").onclick = function() {
@@ -602,7 +605,7 @@ function runGenerationProcess(grid, w) {
     if (t.includes("keep()")) {
       t = t.replace(/keep\(\)/g, "")
     } else {
-      GID("cell-box").innerHTML = "";
+      GID("outputText").innerHTML = "";
     }
 
     for (let i = 0; i < kv.length; i++) {
@@ -610,13 +613,13 @@ function runGenerationProcess(grid, w) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
       }
     }
-    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
+    GID("outputText").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   } else {
     let t = generate();
     if (t.includes("keep()")) {
       t = t.replace(/keep\(\)/g, "")
     } else {
-      GID("cell-box").innerHTML = "";
+      GID("outputText").innerHTML = "";
     }
 
     for (let i = 0; i < kv.length; i++) {
@@ -624,11 +627,11 @@ function runGenerationProcess(grid, w) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
       }
     }
-    GID("cell-box").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
+    GID("outputText").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   }
 
 
-  GID("cell-box").innerHTML += `<div id="choices-box"></div>`
+  GID("outputText").innerHTML += `<div id="choices-box"></div>`
   for (let n = 0; n < g.choices.length; n++) {
     let parens = /\([\w\s\d\,\!\$\.\=\+\-\>\<\/\"\”\“\']+\)/g;
     //WORKING HERE
@@ -993,13 +996,64 @@ function getRandomColor() {
 
 let kv = [];
 
-
 function runFunctions(w, t) {
   let stillT = true;
+  let c = document.getElementById("outputCanvas");
+  let ctx = c.getContext("2d");
   while (stillT === true) {
     t = `${t}`
     replaceVariable(w, t);
-    if (t && t.includes("getRandomInt(")) {
+    if (t && t.match(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)) {
+      //canvas settings (like fillStyle)  - must end in semicolon
+      let p = t.match(/ctx\.(\w+)\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)[1];
+      let setting = t.match(/ctx\.\w+\s\=\s([A-Za-z\s\d\,\"\'\(\)]+)\;/)[1]
+      console.log(p);
+      console.log(setting);
+      let c = document.getElementById("outputCanvas");
+      let ctx = c.getContext("2d");
+      ctx[p] = setting;
+      t = t.replace(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/, "")
+    } else if (t && t.match(/ctx\.\w+\(/)) {
+      //canvas functions
+      let f = t.match(/ctx\.(\w+)\(/)[1]
+      console.log(f);
+      let args;
+      console.log(t);
+      if (t.match(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/)) {
+        args = t.match(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/)[1]
+        t = t.replace(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/, "")
+      } else {
+        args = null;
+        t = t.replace(/ctx\.\w+\(\)/, "")
+      }
+      if (args && args.includes(",")) {
+        args = args.split(",");
+        for (let i = 0; i < args.length; i++) {
+          if (isNumeric(args[i])) {
+            args[i] = parseInt(args[i].trim());
+          } else {
+            args[i] = args[i].trim();
+          }
+
+        }
+      }
+      //let c = document.getElementById("outputCanvas");
+      //let ctx = c.getContext("2d");
+      console.log(args);
+      //special case for image draw
+      if (f.includes("drawImage")) {
+        let img = new Image;
+        console.log(args[0])
+        img.src = `${args[0]}`;
+        args[0] = img
+      }
+      if (args) {
+        ctx[f](...args)
+      } else {
+        ctx[f]
+      }
+
+    } else if (t && t.includes("getRandomInt(")) {
       let m = t.match(/getRandomInt\((\d+)\,\s?(\d+)\)/);
       if (m && m[1] && m[2])  {
         t = t.replace(/getRandomInt\((\d+)\,\s?(\d+)\)/, getRandomInt(parseInt(m[1]), parseInt(m[2])))
