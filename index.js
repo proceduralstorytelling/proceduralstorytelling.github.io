@@ -201,7 +201,7 @@ function setVariableArray(v) {
 }
 
 function parseVariableFromText(t) {
-  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\{\}\.]+)\s([\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\{\}\.]+)/);
+  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\{\}\.]+)\s([\*\/\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\{\}\.]+)/);
   if (matches && matches.length > 0) {
     let o = {};
     o.name = matches[1];
@@ -219,7 +219,7 @@ function getChoiceFromMatch(m, coords) {
   let ry = /y([\-\d]+)/
   o.x = parseInt(coords.match(rx)[1]);
   o.y = parseInt(coords.match(ry)[1]);
-  let parens = /\([\w\s\d\,\!\/\'\"\”\“\$\.\=\+\-\>\<\%]+\)/g;
+  let parens = /\([\w\s\d\,\!\/\'\"\”\“\$\.\*\/\=\+\-\>\<\%]+\)/g;
   let  parensArr = m.match(parens) || [];
   //o.text = m.replace(parens, "");
   o.text = m;
@@ -245,11 +245,11 @@ function getChoiceFromMatch(m, coords) {
 }
 
 function process(unprocessed, coords) {
-  let total = /\[[\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\”\“\”\“\%\/]+\]/g
+  let total = /\[[\{\}\w\s\+\.\-\=\*\<\>\!\?\d\,\:\;\(\)\$\'\"\”\“\”\“\%\/]+\]/g
   let rx = /x([\-\d]+)/
   let ry = /y([\-\d]+)/
   let digits = /\[(\d+)\]/
-  let components = unprocessed.split("*")
+  let components = unprocessed.split("|")
   let cArr = [];
   for (let j = 0; j < components.length; j++) {
     let c = {};
@@ -268,7 +268,7 @@ function process(unprocessed, coords) {
       possibleComponents = createPossibleComponentsArr(walker, currentCell.components);
       currentComponent = getComponent(possibleComponents);*/
     }
-    c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\+\.\-\!\?\,\:\d\(\)\$\'\"\”\“\%\/]+\]/g, "")
+    c.text = c.text.replace(/\[[\{\}\w\s\=\<\>\*\+\.\-\!\?\,\:\d\(\)\$\'\"\”\“\%\/]+\]/g, "")
     let matches = components[j].match(total);
     if (matches) {
       for (let n = 0; n < matches.length; n++) {
@@ -843,8 +843,12 @@ function doMath(num1, operator, num2, walker) {
       return num1 + num2;
     } else if (operator === "-=") {
       return num1 - num2;
+    } else if (operator === "*=") {
+      return num1 * num2;
     } else if (operator === "=") {
       return num2;
+    } else if (operator === "/=") {
+      return num1 / num2
     }
   }
   return num2;
