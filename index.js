@@ -142,6 +142,7 @@ g.output = "";
 g.choices = [];
 g.speak = [];
 g.speakers = [];
+g.arrays = {}
 
 function createGrid(n) {
   let grid = {};
@@ -298,6 +299,7 @@ function process(unprocessed, coords) {
       }
     }
     cArr.push(c);
+    console.log(c);
   }
   return cArr
 }
@@ -307,6 +309,16 @@ function saveCell(g, coords) {
   let ry = /y([\-\d]+)/
   let v = GID(`${coords}`).value
   let teleport;
+  console.log("saving");
+  console.log(v);
+  if (v.match(/(\w+)\s\=\s\[\]/)) {
+    let matchArr = v.match(/(\w+)\s\=\s\[\]/g)
+    for (let i = 0; i < matchArr.length; i++) {
+      let name = matchArr[i].match(/(\w+)\s\=\s\[\]/)[1]
+      g.arrays[`${name}`] = [];
+      console.log(g.arrays);
+    }
+  }
   if (v.length > 0 && v.includes("BREAK(")) {
     let m = v.match(/BREAK\(([\s\S]+)\)END/);
     if (m && m[1]) {
@@ -868,32 +880,38 @@ function getWalker(start, w) {
 
 
 function getComponent(possible) {
-  let totalProb = 0;
-  for (let i = 0; i < possible.length; i++) {
-    if (possible[i].probability) {
-      totalProb += parseInt(possible[i].probability)
-    } else {
-      totalProb += 100;
+
+  if (possible[0].probability) {
+    let totalProb = 0;
+    for (let i = 0; i < possible.length; i++) {
+      if (possible[i].probability) {
+        totalProb += parseInt(possible[i].probability)
+      } else {
+        totalProb += 100;
+      }
     }
-  }
-  let rand = getRandomInt(0, totalProb)
-  let countProb = 0;
-  for (let i = 0; i < possible.length; i++) {
-    let lowProb = countProb;
-    if (possible[i].probability) {
-      countProb += parseInt(possible[i].probability)
-    } else {
-      countProb += 100;
+    let rand = getRandomInt(0, totalProb)
+    let countProb = 0;
+    for (let i = 0; i < possible.length; i++) {
+      let lowProb = countProb;
+      if (possible[i].probability) {
+        countProb += parseInt(possible[i].probability)
+      } else {
+        countProb += 100;
+      }
+      let highProb = countProb;
+      if (rand >= lowProb && rand <= highProb) {
+        return possible[i];
+      }
     }
-    let highProb = countProb;
-    if (rand >= lowProb && rand <= highProb) {
-      return possible[i];
-    }
+  } else {
+    return possible[0]
   }
 }
 
 
 function genLoop(walker) {
+  console.log(walker);
   let res = ""
   let generating = true;
   while (generating === true) {
@@ -1003,7 +1021,21 @@ function runFunctions(w, t) {
   while (stillT === true) {
     t = `${t}`
     replaceVariable(w, t);
-    if (t && t.match(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)) {
+    if (t && t.includes(".push(")) {
+      let m = t.match(/(\w+)\.push\((\w+)\)/)
+      let arrName = m[1];
+      let varName = m[2];
+      let o = {};
+      for (let i = 0; i < w.variables.length; i++) {
+        if (w.variables[i].name.includes(`${m[2]}`)) {
+          let prop = w.variables[i].name.match(/\.(\w+)/)[1];
+          o[`${prop}`] = w.variables[i].value
+        }
+      }
+      g.arrays[arrName].push(o)
+      console.log(g);
+      t = t.replace(/(\w+)\.push\((\w+)\)/)
+    } else if (t && t.match(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)) {
       //canvas settings (like fillStyle)  - must end in semicolon
       let p = t.match(/ctx\.(\w+)\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)[1];
       let setting = t.match(/ctx\.\w+\s\=\s([A-Za-z\s\d\,\"\'\(\)]+)\;/)[1]
