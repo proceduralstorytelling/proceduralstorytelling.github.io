@@ -53,6 +53,15 @@ function compare(v, o, nv) {
     v = parseInt(v);
     nv = parseInt(nv);
   }
+  if (o === "includes") {
+    console.log(v);
+    console.log(nv);
+    if (`${v}`.includes(`${nv}`)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   if (o === "===") {
     if (v === nv) {
       return true;
@@ -190,6 +199,7 @@ function normBrackets(s) {
 }
 
 function setVariableArray(v) {
+  console.log(v);
   let arr = [];
   for (let i = 0; i < v.length; i++) {
     let variable = parseVariableFromText(v[i])
@@ -201,7 +211,7 @@ function setVariableArray(v) {
 }
 
 function parseVariableFromText(t) {
-  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\{\}\.]+)\s([\*\/\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\{\}\.]+)/);
+  let matches = t.match(/\s?([\w\s\d\,\!\(\)\$\{\}\.]+)\s(includes|[\*\/\+\=\-\!\<\>]+)\s([\w\s\d\,\!\(\)\$\{\}\.]+)/);
   if (matches && matches.length > 0) {
     let o = {};
     o.name = matches[1];
@@ -290,7 +300,7 @@ function process(unprocessed, coords) {
           c.color = matches[n].replace("color: ", "").replace("[", "").replace("]", "")
         } else if (matches[n].includes("img:")) {
           c.img = matches[n].replace("img: ", "").replace("[", "").replace("]", "")
-        } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">")) {
+        } else if (matches[n].includes("=") || matches[n].includes("<") || matches[n].includes(">") || matches[n].includes("includes")) {
           let unprocessedVariables = normBrackets(matches[n])
           c.variables = setVariableArray(unprocessedVariables);
         } else {
@@ -299,7 +309,6 @@ function process(unprocessed, coords) {
       }
     }
     cArr.push(c);
-    console.log(c);
   }
   return cArr
 }
@@ -309,14 +318,11 @@ function saveCell(g, coords) {
   let ry = /y([\-\d]+)/
   let v = GID(`${coords}`).value
   let teleport;
-  console.log("saving");
-  console.log(v);
   if (v.match(/(\w+)\s\=\s\[\]/)) {
     let matchArr = v.match(/(\w+)\s\=\s\[\]/g)
     for (let i = 0; i < matchArr.length; i++) {
       let name = matchArr[i].match(/(\w+)\s\=\s\[\]/)[1]
       g.arrays[`${name}`] = [];
-      console.log(g.arrays);
     }
   }
   if (v.length > 0 && v.includes("BREAK(")) {
@@ -915,7 +921,6 @@ function getComponent(possible) {
 
 
 function genLoop(walker) {
-  console.log(walker);
   let res = ""
   let generating = true;
   while (generating === true) {
@@ -1037,14 +1042,11 @@ function runFunctions(w, t) {
         }
       }
       g.arrays[arrName].push(o)
-      console.log(g);
       t = t.replace(/(\w+)\.push\((\w+)\)/)
     } else if (t && t.match(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)) {
       //canvas settings (like fillStyle)  - must end in semicolon
       let p = t.match(/ctx\.(\w+)\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)[1];
       let setting = t.match(/ctx\.\w+\s\=\s([A-Za-z\s\d\,\"\'\(\)]+)\;/)[1]
-      console.log(p);
-      console.log(setting);
       let c = document.getElementById("outputCanvas");
       let ctx = c.getContext("2d");
       ctx[p] = setting;
@@ -1052,9 +1054,7 @@ function runFunctions(w, t) {
     } else if (t && t.match(/ctx\.\w+\(/)) {
       //canvas functions
       let f = t.match(/ctx\.(\w+)\(/)[1]
-      console.log(f);
       let args;
-      console.log(t);
       if (t.match(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/)) {
         args = t.match(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/)[1]
         t = t.replace(/ctx\.\w+\(([\w\d\,\s\<\/\>\"\'\.\=]+)\)/, "")
@@ -1075,11 +1075,9 @@ function runFunctions(w, t) {
       }
       //let c = document.getElementById("outputCanvas");
       //let ctx = c.getContext("2d");
-      console.log(args);
       //special case for image draw
       if (f.includes("drawImage")) {
         let img = new Image;
-        console.log(args[0])
         img.src = `${args[0]}`;
         args[0] = img
       }
@@ -1156,8 +1154,6 @@ function runFunctions(w, t) {
       //compromise
       let m = t.match(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/);
       let res;
-      console.log(m[1]);
-      console.log(m[2])
       res = runCompromise(m[2], m[1]);
       if (res) {
         t = t.replace(/\{([A-Za-z\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\{\}\'\"\”\“\%\/$\n]+)\}\.([\w\#\(\)\s\.]+)/, res)
@@ -1169,7 +1165,6 @@ function runFunctions(w, t) {
       let m = t.match(/markov\(([\(\)\{\}\w\s\+\.\-\=\<\>\!\?\d\,\n\:\;\$\'\"\”\“\%\/$]+)\,\s(\d+)\,\s(\d+)\)/)
       markov.addStates(m[1]);
       markov.train(parseInt(m[2]));
-      console.log(markov);
       let rep = markov.generateRandom(parseInt(m[3]))
       t = t.replace(/markov\(([\{\}\w\s\+\.\-\=\<\>\!\?\d\,\:\;\(\)\$\'\"\”\“\%\/]+)\,\s(\d+)\,\s(\d+)\)/, rep)
     } else if (t && t.includes("grid()")) {
@@ -1323,7 +1318,7 @@ function createPossibleComponentsArr(w, c) {
 }
 
 function isComparisonOperator(operator) {
-  if (operator === "===" || operator.includes("<") || operator.includes(">")) {
+  if (operator === "===" || operator.includes("<") || operator.includes(">") || operator.includes("includes")) {
     return true;
   } else {
     return false;
@@ -1349,6 +1344,8 @@ function variablesHaveSameName(v1, v2) {
 function variableComparisonsFail(w, compVar) {
   for (let i = 0; i < w.variables.length; i++) {
     if (variablesHaveSameName(w.variables[i], compVar)) {
+      console.log(w.variables[i])
+      console.log(compVar)
       if (compare(w.variables[i].value, compVar.operation, compVar.value) === false) {
         return true;
       }
