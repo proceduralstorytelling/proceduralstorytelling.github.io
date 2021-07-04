@@ -54,8 +54,6 @@ function compare(v, o, nv) {
     nv = parseInt(nv);
   }
   if (o === "includes") {
-    console.log(v);
-    console.log(nv);
     if (`${v}`.includes(`${nv}`)) {
       return true;
     } else {
@@ -199,7 +197,6 @@ function normBrackets(s) {
 }
 
 function setVariableArray(v) {
-  console.log(v);
   let arr = [];
   for (let i = 0; i < v.length; i++) {
     let variable = parseVariableFromText(v[i])
@@ -869,9 +866,21 @@ function getGridByName(g, n) {
   }
 }
 
-function setStart() {
+function setStart(w) {
   let starts = getStarts()
-  let start = getRandomStart(starts);
+  let constrainedStarts = [];
+  let start;
+  if (w) {
+    for (let i = 0; i < starts.length; i++) {
+      let arr = createPossibleComponentsArr(w, starts[i].components);
+      if (arr.length > 0) {
+        constrainedStarts.push(starts[i])
+      }
+    }
+    start = getRandomStart(constrainedStarts);
+  } else {
+    start = getRandomStart(starts);
+  }
   return start;
 }
 
@@ -1344,8 +1353,6 @@ function variablesHaveSameName(v1, v2) {
 function variableComparisonsFail(w, compVar) {
   for (let i = 0; i < w.variables.length; i++) {
     if (variablesHaveSameName(w.variables[i], compVar)) {
-      console.log(w.variables[i])
-      console.log(compVar)
       if (compare(w.variables[i].value, compVar.operation, compVar.value) === false) {
         return true;
       }
@@ -1442,7 +1449,12 @@ function generate(grid, w, continuing) {
     lastGrid = g.currentGrid;
     g.currentGrid = grid;
   }
-  let start = setStart();
+  let start;
+  if (w) {
+    start = setStart(w)
+  } else {
+    start = setStart()
+  }
   let walker = w || getWalker(start)
   if (continuing) {
 
