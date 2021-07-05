@@ -893,6 +893,10 @@ function getWalker(start, w) {
     walker.x = parseInt(start.x);
     walker.y = parseInt(start.y);
     walker.variables = [];
+    walker.namespace = "global";
+    walker.arrayBox = {
+      global: []
+    };
   }
   return walker;
 }
@@ -1253,11 +1257,31 @@ function runFunctions(w, t) {
 }
 
 function addComponentTo(w, comp) {
+
+  //WORK table
+
+  if (comp.text.includes("namespace(")) {
+    let n = comp.text.match(/namespace\(([\w\d\s\$\{\}]+)\)/)[1];
+    n = replaceVariable(w, n);
+    w.namespace = n;
+    console.log(w.namespace)
+    if (w.arrayBox[`${w.namespace}`]) {
+
+    } else {
+      w.arrayBox[`${w.namespace}`] = []
+    }
+    comp.text = comp.text.replace(/namespace\(([\w\d\s\$\{\}]+)\)/, "")
+  }
+
+
+
+  //END WORK TABLE
+
   if (comp.variables) {
     for (let i = 0; i < comp.variables.length; i++) {
       let exists = false;
-      for (let j = 0; j < w.variables.length; j++) {
-        let wv = w.variables[j];
+      for (let j = 0; j < w.arrayBox[`${w.namespace}`].length; j++) {
+        let wv = w.arrayBox[`${w.namespace}`][j];
         wv = replaceVariable(w, wv);
         let cv = comp.variables[i];
         cv.name = replaceVariable(w, cv.name);
@@ -1274,7 +1298,7 @@ function addComponentTo(w, comp) {
             wv.value = runFunctions(w, wv.value);
             //cv.value = runFunctions(w, cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value, w)
-            w.variables[j].value = replaceVariable(w, newValue);
+            w.arrayBox[`${w.namespace}`].value = replaceVariable(w, newValue);
           }
         }
       }
@@ -1289,7 +1313,7 @@ function addComponentTo(w, comp) {
         o.value = replaceVariable(w, o.value)
         o.value = runGrids(w, o.value)
         o.value = runFunctions(w, o.value)
-        w.variables.push(o);
+        w.arrayBox[`${w.namespace}`].push(o);
       }
     }
   }
@@ -1310,6 +1334,7 @@ function addComponentTo(w, comp) {
   if (comp.img && comp.img.length > 0) {
     GID("cell-box").style.backgroundImage = `url(${comp.img})`;
   }
+  console.log(w);
 }
 
 function getRandomFromArr(arr) {
@@ -1336,7 +1361,7 @@ function isComparisonOperator(operator) {
 }
 
 function walkerIsEmptyButComponentCompares(w, c) {
-  if (w.variables.length === 0 && isComparisonOperator(c.operation)) {
+  if (w.arrayBox[`${w.namespace}`].length === 0 && isComparisonOperator(c.operation)) {
     return true;
   } else {
     return false;
@@ -1352,9 +1377,9 @@ function variablesHaveSameName(v1, v2) {
 }
 
 function variableComparisonsFail(w, compVar) {
-  for (let i = 0; i < w.variables.length; i++) {
-    if (variablesHaveSameName(w.variables[i], compVar)) {
-      if (compare(w.variables[i].value, compVar.operation, compVar.value) === false) {
+  for (let i = 0; i < w.arrayBox[`${w.namespace}`].length; i++) {
+    if (variablesHaveSameName(w.arrayBox[`${w.namespace}`][i], compVar)) {
+      if (compare(w.arrayBox[`${w.namespace}`][i].value, compVar.operation, compVar.value) === false) {
         return true;
       }
     }
