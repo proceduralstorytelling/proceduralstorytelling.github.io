@@ -1047,6 +1047,7 @@ function runFunctions(w, t) {
       for (let i = 0; i < w.variables.length; i++) {
         if (w.variables[i].name.includes(`${m[2]}`)) {
           let prop = w.variables[i].name.match(/\.(\w+)/)[1];
+          o.name = m[2]
           o[`${prop}`] = w.variables[i].value
         }
       }
