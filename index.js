@@ -629,6 +629,7 @@ function runGenerationProcess(grid, w) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
       }
     }
+    t = t.replace(/\[choice\:\s[\w\s\d\,\!\$\.\=\+\-\>\<\/\"\”\“\'\(\)\;\:]+\]/g, "")
     GID("outputText").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   } else {
     let t = generate();
@@ -643,6 +644,7 @@ function runGenerationProcess(grid, w) {
         t = t.replace(`${kv[i].k}`, `<div class="tooltip">${kv[i].k}<span class="tooltiptext">${kv[i].v}</span></div>`)
       }
     }
+    t = t.replace(/\[choice\:\s[\w\s\d\,\!\$\.\=\+\-\>\<\/\"\”\“\'\(\)\;\:]+\]/g, "")
     GID("outputText").innerHTML += `<div id="output-box">${replaceVariable(g.lastWalker, t)}</div>`;
   }
 
@@ -987,7 +989,6 @@ function genLoop(walker) {
 }
 
 function addChoiceToWalker(w, c) {
-  console.log(w);
   if (c.variables) {
     for (let i = 0; i < c.variables.length; i++) {
       let exists = false;
@@ -1276,7 +1277,6 @@ function addComponentTo(w, comp) {
     let n = comp.text.match(/namespace\(([\w\d\s\$\{\}]+)\)/)[1];
     n = replaceVariable(w, n);
     w.namespace = n;
-    console.log(w.namespace)
     if (w.arrayBox[`${w.namespace}`]) {
 
     } else {
@@ -1357,7 +1357,6 @@ function addComponentTo(w, comp) {
   if (comp.img && comp.img.length > 0) {
     GID("cell-box").style.backgroundImage = `url(${comp.img})`;
   }
-  console.log(w);
 }
 
 function getRandomFromArr(arr) {
