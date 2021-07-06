@@ -503,9 +503,10 @@ function showHide(el) {
   }
 }
 
-GID("gogram").onclick = function() {
+/*GID("gogram").onclick = function() {
   GID("landing").style.display = "none";
 }
+*/
 
 //otherwise, boxes only appear on second click...
 GID("cell-box").style.display = "none";
