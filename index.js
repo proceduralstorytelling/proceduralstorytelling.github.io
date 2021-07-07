@@ -896,15 +896,6 @@ function getWalker(start, w) {
     walker.x = parseInt(start.x);
     walker.y = parseInt(start.y);
     walker.variables = [];
-    walker.namespace = "global";
-
-    walker.arrayBox = {
-      global: {
-        global: [
-
-        ]
-      }
-    };
   }
   return walker;
 }
@@ -992,12 +983,12 @@ function addChoiceToWalker(w, c) {
   if (c.variables) {
     for (let i = 0; i < c.variables.length; i++) {
       let exists = false;
-      for (let j = 0; j < w.arrayBox[`${w.namespace}`][`${w.currentObject}`].length; j++) {
-        if (variablesHaveSameName(w.arrayBox[`${w.namespace}`][`${w.currentObject}`][j], c.variables[i])) {
+      for (let j = 0; j < w.variables.length; j++) {
+        if (variablesHaveSameName(w.variables[j], c.variables[i])) {
           exists = true;
           if (isComparisonOperator(c.variables[i].operation) === false) {
-            let newValue = doMath(w.arrayBox[`${w.namespace}`][`${w.currentObject}`].value, c.variables[i].operation, c.variables[i].value, w)
-            w.arrayBox[`${w.namespace}`][`${w.currentObject}`][j].value = newValue;
+            let newValue = doMath(w.variables[j].value, c.variables[i].operation, c.variables[i].value, w)
+            w.variables[j].value = newValue;
           }
         }
       }
@@ -1006,7 +997,7 @@ function addChoiceToWalker(w, c) {
         let o = {};
         o.name = c.variables[i].name;
         o.value = doMath(0, c.variables[i].operation, c.variables[i].value, w)
-        w.arrayBox[`${w.namespace}`][`${w.currentObject}`].push(o);
+        w.variables.push(o);
       }
     }
   }
@@ -1265,46 +1256,11 @@ function runFunctions(w, t) {
 }
 
 function addComponentTo(w, comp) {
-
-  //WORK table
-  if (w.currentObject) {
-
-  } else {
-    w.currentObject = "global";
-  }
-
-  if (comp.text.includes("namespace(")) {
-    let n = comp.text.match(/namespace\(([\w\d\s\$\{\}]+)\)/)[1];
-    n = replaceVariable(w, n);
-    w.namespace = n;
-    if (w.arrayBox[`${w.namespace}`]) {
-
-    } else {
-      w.arrayBox[`${w.namespace}`] = {}
-      w.arrayBox[`${w.namespace}`][`${w.currentObject}`] = [];
-    }
-    comp.text = comp.text.replace(/namespace\(([\w\d\s\$\{\}]+)\)/, "")
-  }
-
-  if (comp.text.includes("object(")) {
-    let o = comp.text.match(/object\(([\w\d\s\$\{\}]+)\)/)[1];
-    o = replaceVariable(w, o);
-    w.currentObject = o;
-    if (w.arrayBox[`${w.namespace}`][`${w.currentObject}`]) {
-
-    } else {
-      w.arrayBox[`${w.namespace}`][`${w.currentObject}`] = [];
-    }
-    comp.text = comp.text.replace(/object\(([\w\d\s\$\{\}]+)\)/, "")
-  }
-
-  //END WORK TABLE
-
   if (comp.variables) {
     for (let i = 0; i < comp.variables.length; i++) {
       let exists = false;
-      for (let j = 0; j < w.arrayBox[`${w.namespace}`][`${w.currentObject}`].length; j++) {
-        let wv = w.arrayBox[`${w.namespace}`][`${w.currentObject}`][j];
+      for (let j = 0; j < w.variables.length; j++) {
+        let wv = w.variables[j];
         wv = replaceVariable(w, wv);
         let cv = comp.variables[i];
         cv.name = replaceVariable(w, cv.name);
@@ -1321,7 +1277,7 @@ function addComponentTo(w, comp) {
             wv.value = runFunctions(w, wv.value);
             //cv.value = runFunctions(w, cv.value);
             let newValue = doMath(wv.value, cv.operation, cv.value, w)
-            w.arrayBox[`${w.namespace}`][`${w.currentObject}`].value = replaceVariable(w, newValue);
+            w.variables[j].value = replaceVariable(w, newValue);
           }
         }
       }
@@ -1336,7 +1292,7 @@ function addComponentTo(w, comp) {
         o.value = replaceVariable(w, o.value)
         o.value = runGrids(w, o.value)
         o.value = runFunctions(w, o.value)
-        w.arrayBox[`${w.namespace}`][`${w.currentObject}`].push(o);
+        w.variables.push(o);
       }
     }
   }
@@ -1383,7 +1339,7 @@ function isComparisonOperator(operator) {
 }
 
 function walkerIsEmptyButComponentCompares(w, c) {
-  if (w.arrayBox[`${w.namespace}`][`${w.currentObject}`].length === 0 && isComparisonOperator(c.operation)) {
+  if (w.variables.length === 0 && isComparisonOperator(c.operation)) {
     return true;
   } else {
     return false;
@@ -1399,9 +1355,9 @@ function variablesHaveSameName(v1, v2) {
 }
 
 function variableComparisonsFail(w, compVar) {
-  for (let i = 0; i < w.arrayBox[`${w.namespace}`][`${w.currentObject}`].length; i++) {
-    if (variablesHaveSameName(w.arrayBox[`${w.namespace}`][`${w.currentObject}`][i], compVar)) {
-      if (compare(w.arrayBox[`${w.namespace}`][`${w.currentObject}`][i].value, compVar.operation, compVar.value) === false) {
+  for (let i = 0; i < w.variables.length; i++) {
+    if (variablesHaveSameName(w.variables[i], compVar)) {
+      if (compare(w.variables[i].value, compVar.operation, compVar.value) === false) {
         return true;
       }
     }
