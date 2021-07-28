@@ -745,6 +745,9 @@ function move(e) {
     g.currentGrid.currentY -= 1;
     drawGrid();
   }
+  if (c === 27) {
+    GID("cell-box").style.display = "none";
+  }
 }
 
 function getCell(x, y) {
@@ -1218,7 +1221,7 @@ function runFunctions(w, t) {
       }
       t = t.replace(/replaceKey\(([\w\d\s\.\,\?\!\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\,\?\;\!\:\<\>\-\+\=\"\”\“\/\\]+)\)/, "")
     } else if (t && t.includes("addKey(")) {
-      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+)\)/)
+      let m = t.match(/addKey\(([\w\d\s\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+),\s([\w\d\s\,\.\!\?\;\:\<\>\-\+\=\"\”\“\/\\]+)\)/)
       let exists = false;
       for (let i = 0; i < kv.length; i++) {
         if (kv[i].k === m[1]) {
