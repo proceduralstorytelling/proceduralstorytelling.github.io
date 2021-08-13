@@ -265,7 +265,7 @@ function process(unprocessed, coords) {
     c.choices = [];
     c.text = components[j].trim();
     if (c.text.includes("teleport(")) {
-      let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-$\{\}\w]+)\,\s([\d\-$\{\}\w]+)\)/)
+      let m = c.text.match(/teleport\(([\w\d\$\{\}]+)\,\s([\d\-\$\{\}\w]+)\,\s([\d\-\$\{\}\w]+)\)/)
       c.teleport = {};
       c.teleport.gridName = m[1];
       c.teleport.x = m[2];
