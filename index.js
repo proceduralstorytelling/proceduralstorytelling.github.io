@@ -150,6 +150,10 @@ g.choices = [];
 g.speak = [];
 g.speakers = [];
 g.arrays = {}
+g.monthText = "January";
+g.month = 1;
+g.day = 1;
+g.year = 2021
 
 function createGrid(n) {
   let grid = {};
@@ -1012,16 +1016,31 @@ function runGrids(w, t) {
     t = `${t}`;
     if (t && t.includes("runGrid(")) {
       let m = t.match(/runGrid\(([\w\s\d,\!\$\.]+)\)/);
+      let res = ""
       for (let i = 1; i < m.length; i++) {
-        let res = "";
-        let lastGrid = g.currentGrid;
-        let lastX = w.x;
-        let lastY = w.y;
-        let nextGrid = getGridByName(g, m[i]);
-        res += generate(nextGrid, w);
-        g.currentGrid = lastGrid;
-        w.x = lastX;
-        w.y = lastY;
+        let iteratorCount = m[i].match(/\,\s(\d+)/);
+        m[i] = m[i].replace(/\,\s(\d+)/, "")
+        if (iteratorCount && iteratorCount[1]) {
+          for (let n = 1; n < iteratorCount[1]; n++) {
+            let lastGrid = g.currentGrid;
+            let lastX = w.x;
+            let lastY = w.y;
+            let nextGrid = getGridByName(g, m[i]);
+            res += generate(nextGrid, w);
+            g.currentGrid = lastGrid;
+            w.x = lastX;
+            w.y = lastY;
+          }
+        } else {
+          let lastGrid = g.currentGrid;
+          let lastX = w.x;
+          let lastY = w.y;
+          let nextGrid = getGridByName(g, m[i]);
+          res += generate(nextGrid, w);
+          g.currentGrid = lastGrid;
+          w.x = lastX;
+          w.y = lastY;
+        }
         t = t.replace(/runGrid\(([\w\s\d,\!\$\.]+)\)/, res)
       }
     } else {
@@ -1059,6 +1078,12 @@ function runFunctions(w, t) {
       }
       g.arrays[arrName].push(o)
       t = t.replace(/(\w+)\.push\((\w+)\)/)
+    } else if (t && t.includes("date()")) {
+      t = t.replace("date()", `${g.monthText} ${g.day}, ${g.year}`)
+    } else if (t && t.includes("addDay(")) {
+      let m = t.match(/addDay\((\d+)\)/)
+      addDay(parseInt(m[1]))
+      t = t.replace(/addDay\(\d+\)/, "");
     } else if (t && t.match(/ctx\.\w+\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)) {
       //canvas settings (like fillStyle)  - must end in semicolon
       let p = t.match(/ctx\.(\w+)\s\=\s[A-Za-z\s\d\,\"\'\(\)]+\;/)[1];
@@ -1476,4 +1501,57 @@ function generate(grid, w, continuing) {
     g.currentGrid = lastGrid
   }
   return res
+}
+
+function addDay(num) {
+  console.log(num);
+  for (let i = 0; i < num; i++) {
+    g.day += 1;
+    if (g.day > 28 && g.monthText === "February") {
+      g.day -= 28;
+      g.month += 1;
+      normalizeMonth()
+    } else if (g.day > 30 && (g.monthText === "September" || g.monthText === "April" || g.monthText === "June" || g.monthText === "November")) {
+      g.day -= 30;
+      g.month += 1;
+      normalizeMonth()
+    } else if (g.day > 31) {
+      g.day -= 31
+      if (g.month === 12) {
+        g.month = 1
+        g.year += 1;
+      } else {
+        g.month += 1;
+      }
+      normalizeMonth()
+    }
+  }
+}
+
+function normalizeMonth() {
+  if (g.month === 1) {
+    g.monthText = "January"
+  } else if (g.month === 2) {
+    g.monthText = "February"
+  } else if (g.month === 3) {
+    g.monthText = "March"
+  } else if (g.month === 4) {
+    g.monthText = "April"
+  } else if (g.month === 5) {
+    g.monthText = "May"
+  } else if (g.month === 6) {
+    g.monthText = "June"
+  } else if (g.month === 7) {
+    g.monthText = "July"
+  } else if (g.month === 8) {
+    g.monthText = "August"
+  } else if (g.month === 9) {
+    g.monthText = "September"
+  } else if (g.month === 10) {
+    g.monthText = "October"
+  } else if (g.month === 11) {
+    g.monthText = "November"
+  } else if (g.month === 12) {
+    g.monthText = "December"
+  }
 }
